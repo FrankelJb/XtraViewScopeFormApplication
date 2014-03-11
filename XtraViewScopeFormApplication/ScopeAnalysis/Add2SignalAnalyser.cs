@@ -37,6 +37,10 @@ namespace XtraViewScope.ScopeAnalysis
             StringBuilder sb = new StringBuilder();
             while (i < waveform.SampleCount)
             {
+                sb.Append(period.ToString("ss.FFFFFFF"));
+                sb.Append("\t");
+                sb.Append(waveform.Samples[i].Value.ToString());
+                sb.Append(Environment.NewLine);
                 //Lets make sure that we have the proper amplitude, direction doesn't matter
                 double currentValue = Math.Abs(waveform.Samples[i].Value);
                 if (currentValue < 0.5)
@@ -194,10 +198,35 @@ namespace XtraViewScope.ScopeAnalysis
                 add2Packets[8].Nibbles.RemoveAt(8);
             }
 
+            WriteFullTimeDataToFile(sb);
+
             add2SignalAnalysisResult.Heartbeat.Add2Packets = add2Packets;
             signalAnalysisResultContainer.SignalAnalysisResult = add2SignalAnalysisResult;
 
             return signalAnalysisResultContainer;
+        }
+
+
+        //TODO: Delete this method
+        void WriteFullTimeDataToFile(StringBuilder sb)
+        {
+            string directoryPath = @"C:\waveform";
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            FileInfo filePath = new FileInfo(Path.Combine(directoryPath, @"dataPoints.txt"));
+            if (!filePath.Exists)
+            {
+                filePath.Create().Close();
+            }
+            else
+            {
+                //File.WriteAllText(filePath.ToString(), String.Empty);
+            }
+
+            File.WriteAllText(filePath.ToString(), sb.ToString());
         }
     }
 }

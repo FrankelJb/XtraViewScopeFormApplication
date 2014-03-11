@@ -41,6 +41,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.DirectoryServices" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -52,11 +53,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectionManagement\XtraViewScopeConnectionManager.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="XtraViewScopeForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="XtraViewScopeForm.Designer.cs">
+      <DependentUpon>XtraViewScopeForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\Add2Packet.cs" />
     <Compile Include="Models\Dictionaries\Add2Dictionary.cs" />
@@ -77,8 +78,8 @@
     <Compile Include="ReportWriting\XmlReportContents.cs" />
     <Compile Include="ScopeAnalysis\Add2SignalAnalyser.cs" />
     <Compile Include="ScopeAnalysis\Add2SignalAnalysisResultContainer.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="XtraViewScopeForm.resx">
+      <DependentUpon>XtraViewScopeForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -110,6 +111,10 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Resources\XMLFile1.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
