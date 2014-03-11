@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XtraViewScopeFormApplication", "XtraViewScopeFormApplication\XtraViewScopeFormApplication.csproj", "{01751B0F-2D24-489E-B84B-0D053668B9A7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0740BA79-9505-4B13-A8F8-FE8E803FA25D} = {0740BA79-9505-4B13-A8F8-FE8E803FA25D}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScopeLibrary", "..\ScopeLibrary\ScopeLibrary\ScopeLibrary.csproj", "{0740BA79-9505-4B13-A8F8-FE8E803FA25D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{01751B0F-2D24-489E-B84B-0D053668B9A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01751B0F-2D24-489E-B84B-0D053668B9A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01751B0F-2D24-489E-B84B-0D053668B9A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01751B0F-2D24-489E-B84B-0D053668B9A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0740BA79-9505-4B13-A8F8-FE8E803FA25D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0740BA79-9505-4B13-A8F8-FE8E803FA25D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0740BA79-9505-4B13-A8F8-FE8E803FA25D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0740BA79-9505-4B13-A8F8-FE8E803FA25D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
