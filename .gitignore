@@ -1,0 +1,6 @@
+TestResults/
+*/bin/
+*/obj/
+bin/
+obj/
+*.suo
