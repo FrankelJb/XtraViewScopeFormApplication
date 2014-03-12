@@ -7,6 +7,19 @@ namespace XtraViewScope.ReportWriting
 {
     public class ReportWriter : IReportWriter
     {
+        private Report report;
+        public Report Report
+        {
+            get
+            {
+                return report;
+            }
+            set
+            {
+                report = value;
+            }
+        }
+
         private string outputDirectory;
         public string OutputDirectory
         {
@@ -29,7 +42,15 @@ namespace XtraViewScope.ReportWriting
             }
         }
 
-        public void WriteReport(Report report)
+        public string FullFilePath
+        {
+            get
+            {
+                return Path.Combine(outputDirectory, filePathString);
+            }
+        }
+
+        public void WriteReport()
         {
             if(Program.configManager.getProperty("DirectoryPath") != null)
             {
@@ -42,24 +63,24 @@ namespace XtraViewScope.ReportWriting
             }
 
             string filetype = "txt";
-            if (report.ReportContents is JsonReportContents)
+            if (Report.ReportContents is JsonReportContents)
             {
                 filetype = "json";
             }
-            else if(report.ReportContents is XmlReportContents)
+            else if (Report.ReportContents is XmlReportContents)
             {
                 filetype = "xml";
             }
 
-            filePathString += "_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "." + filetype;
+            FilePathString += "_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "." + filetype;
 
-            FileInfo filePath = new FileInfo(Path.Combine(outputDirectory, filePathString));
+            FileInfo filePath = new FileInfo(Path.Combine(outputDirectory, FilePathString));
             if (!filePath.Exists)
             {
                 filePath.Create().Close();
             }
 
-            File.WriteAllText(filePath.ToString(), report.ReportContents.ToString());
+            File.WriteAllText(filePath.ToString(), Report.ReportContents.ToString());
         }
     }
 }

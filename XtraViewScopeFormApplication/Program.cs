@@ -10,7 +10,7 @@ namespace XtraViewScopeFormApplication
     {
         public static IConfigManager configManager;
         public static Report report;
-        public static ReportContents reportContents;
+        //public static ReportContents reportContents;
         public static IReportWriter reportWriter = new ReportWriter();
 
         /// <summary>
@@ -22,7 +22,6 @@ namespace XtraViewScopeFormApplication
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new XtraViewScopeForm());
-
         }
     }
 }

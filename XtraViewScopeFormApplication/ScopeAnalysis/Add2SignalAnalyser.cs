@@ -37,6 +37,7 @@ namespace XtraViewScope.ScopeAnalysis
             StringBuilder sb = new StringBuilder();
             while (i < waveform.SampleCount)
             {
+                //TODO: remove this sb stuff
                 sb.Append(period.ToString("ss.FFFFFFF"));
                 sb.Append("\t");
                 sb.Append(waveform.Samples[i].Value.ToString());
@@ -192,7 +193,7 @@ namespace XtraViewScope.ScopeAnalysis
                 i++;
             }
 
-            //There is one nibble that remains on the last packet because there is only noise at the of the heartbeat
+            //There is one nibble that remains on the last packet because there is only noise at the end of the heartbeat
             if (add2Packets.Count == 9 && add2Packets[8].Nibbles.Count == 9)
             {
                 add2Packets[8].Nibbles.RemoveAt(8);

@@ -1,7 +1,0 @@
-﻿<ScopeProperties>
-  <ChannelNumber>0</ChannelNumber>
-  <SampleRate>2000000</SampleRate>
-  <SampleRateMin>200000</SampleRateMin>
-  <NumberOfPointsMin>70000</NumberOfPointsMin>
-  <ReportContents>Xml</ReportContents>
-</ScopeProperties>

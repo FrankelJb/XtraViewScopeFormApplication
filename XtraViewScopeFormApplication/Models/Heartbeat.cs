@@ -26,7 +26,6 @@ namespace XtraViewScope.Models
             }
         }
 
-        //TODO: Should this be a collection of statuses?
         private string heartbeatStatus;
         public string HeartbeatStatus
         {
@@ -36,15 +35,19 @@ namespace XtraViewScope.Models
                 {
                     if (add2Packet.Status.Count > 0)
                     {
-                        heartbeatStatus = Enums.HeartbeatStatus.Failed2;
+                        heartbeatStatus = Enums.HeartbeatStatus.FailedAdd2Packets;
                     }
                     foreach (Nibble nibble in add2Packet.Nibbles)
                     {
                         if (nibble.NibbleStatus != null)
                         {
-                            heartbeatStatus = Enums.HeartbeatStatus.Failed3;
+                            heartbeatStatus = Enums.HeartbeatStatus.FailedNibbles;
                         }
                     }
+                }
+                if (heartbeatStatus == null || heartbeatStatus.Equals(""))
+                {
+                    heartbeatStatus = Enums.HeartbeatStatus.Passed;
                 }
                 return heartbeatStatus;
             }
