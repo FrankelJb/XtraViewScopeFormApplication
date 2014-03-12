@@ -43,11 +43,12 @@ namespace XtraViewScopeFormApplication
             this.stopButton = new System.Windows.Forms.Button();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.progressReportLinkLabel = new System.Windows.Forms.LinkLabel();
+            this.fileFormatInformationLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // startButton
             // 
-            this.startButton.Location = new System.Drawing.Point(574, 141);
+            this.startButton.Location = new System.Drawing.Point(586, 141);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(75, 23);
             this.startButton.TabIndex = 0;
@@ -65,10 +66,8 @@ namespace XtraViewScopeFormApplication
             this.configFilePath.Multiline = true;
             this.configFilePath.Name = "configFilePath";
             this.configFilePath.ReadOnly = true;
-            this.configFilePath.Size = new System.Drawing.Size(507, 36);
+            this.configFilePath.Size = new System.Drawing.Size(519, 36);
             this.configFilePath.TabIndex = 1;
-            this.configFilePath.Text = "C:\\Projects\\XtraViewScopeFormApplication\\XtraViewScopeFormApplication\\Resources\\X" +
-    "MLFile1.xml";
             this.configFilePath.Click += new System.EventHandler(this.configFilePath_Click);
             // 
             // label1
@@ -86,7 +85,7 @@ namespace XtraViewScopeFormApplication
             this.outputDirectory.Multiline = true;
             this.outputDirectory.Name = "outputDirectory";
             this.outputDirectory.ReadOnly = true;
-            this.outputDirectory.Size = new System.Drawing.Size(506, 42);
+            this.outputDirectory.Size = new System.Drawing.Size(518, 42);
             this.outputDirectory.TabIndex = 3;
             this.outputDirectory.Text = "C:\\waveform";
             this.outputDirectory.Click += new System.EventHandler(this.configFilePath_Click);
@@ -127,7 +126,7 @@ namespace XtraViewScopeFormApplication
             // 
             // stopButton
             // 
-            this.stopButton.Location = new System.Drawing.Point(493, 141);
+            this.stopButton.Location = new System.Drawing.Point(505, 141);
             this.stopButton.Name = "stopButton";
             this.stopButton.Size = new System.Drawing.Size(75, 23);
             this.stopButton.TabIndex = 8;
@@ -152,11 +151,21 @@ namespace XtraViewScopeFormApplication
             this.progressReportLinkLabel.TabIndex = 10;
             this.progressReportLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.progressReportLinkLabel_LinkClicked);
             // 
+            // fileFormatInformationLabel
+            // 
+            this.fileFormatInformationLabel.AutoSize = true;
+            this.fileFormatInformationLabel.Location = new System.Drawing.Point(347, 119);
+            this.fileFormatInformationLabel.Name = "fileFormatInformationLabel";
+            this.fileFormatInformationLabel.Size = new System.Drawing.Size(316, 13);
+            this.fileFormatInformationLabel.TabIndex = 11;
+            this.fileFormatInformationLabel.Text = "\"_yyyyMMddHHmmssfff.format\" will automatically be appended";
+            // 
             // XtraViewScopeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(661, 172);
+            this.ClientSize = new System.Drawing.Size(674, 172);
+            this.Controls.Add(this.fileFormatInformationLabel);
             this.Controls.Add(this.progressReportLinkLabel);
             this.Controls.Add(this.stopButton);
             this.Controls.Add(this.fileNameFormatSuffix);
@@ -189,6 +198,7 @@ namespace XtraViewScopeFormApplication
         private System.Windows.Forms.Button stopButton;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.LinkLabel progressReportLinkLabel;
+        private System.Windows.Forms.Label fileFormatInformationLabel;
     }
 }
 

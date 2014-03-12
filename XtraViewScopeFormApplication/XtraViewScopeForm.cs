@@ -1,4 +1,5 @@
 ﻿using ScopeLibrary.ConfigManagement;
+using ScopeLibrary.ReportWriting;
 using ScopeLibrary.SignalAnalysis;
 using System;
 using System.ComponentModel;
@@ -7,6 +8,7 @@ using System.IO;
 using System.Threading;
 using System.Windows.Forms;
 using XtraViewScope.ConnectionManagement;
+using XtraViewScope.ReportWriting;
 using XtraViewScope.ScopeAnalysis;
 
 namespace XtraViewScopeFormApplication
@@ -17,17 +19,28 @@ namespace XtraViewScopeFormApplication
         {
             InitializeComponent();
 
-            if (Directory.Exists(@"."))
+            initializeScopeComponents();
+        }
+
+        private void initializeScopeComponents()
+        {
+            //Try and find a config file in the directory of the application
+            foreach (string filename in Directory.GetFiles(@"."))
             {
-                foreach (string filename in Directory.GetFiles(@"."))
+                if (filename.ToLower().Contains("config"))
                 {
-                    if (filename.ToLower().Contains("config"))
-                    {
-                        configFilePath.Text = Path.GetFullPath(filename);
-                    }
-                    //progressReportLinkLabel.Text += filename + " ";
-                    //System.Diagnostics.Debug.WriteLine(filename);
+                    configFilePath.Text = Path.GetFullPath(filename);
                 }
+            }
+
+            //Instantiate the config file using the appropriate format
+            if (configFilePath.Text.ToLower().Contains(".properties"))
+            {
+                Program.configManager = new PropertyConfigManager();
+            }
+            else
+            {
+                Program.configManager = new XmlConfigManager();
             }
         }
 
@@ -37,68 +50,87 @@ namespace XtraViewScopeFormApplication
             progressReportLinkLabel.Links.Clear();
             ChangeControlState(false);
 
+            //Instantiate the report object and parse the config file
+            Program.reportWriter.Report = new Report();
+            Program.configManager.ConfigFilePath = Path.GetFullPath(ConfigFilePath);
+            Program.configManager.loadConfigDocument();
+
+            //Set the report content type
+            if (Program.configManager.getProperty("ReportContents") != null)
+            {
+                if (Program.configManager.getProperty("ReportContents").Equals("Xml"))
+                {
+                    Program.reportWriter.Report.ReportContents = new XmlReportContents();
+                }
+                else if (Program.configManager.getProperty("ReportContents").Equals("Json"))
+                {
+                    Program.reportWriter.Report.ReportContents = new JsonReportContents();
+                }
+            }
+            else
+            {
+                Program.reportWriter.Report.ReportContents = new JsonReportContents();
+            }
+
+            //Do the work using a background worker to free the UI
             backgroundWorker1.RunWorkerAsync();  
         }
+
+        private Thread reportWriterThread;
 
         //This thread is called when the user starts the application.
         //It is invoked using a background worker so that the UI does not appear to freeze and the user can stop the application.
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
             Stopwatch stopwatch = new Stopwatch();
-            Program.configManager = new XmlConfigManager();
-            Program.configManager.ConfigFilePath = Path.GetFullPath(ConfigFilePath);
-            Program.configManager.loadConfigDocument();
 
             SignalAnalyser signalAnalyser = new Add2SignalAnalyser();
 
             XtraViewScopeConnectionManager xtraViewScopeConnectionManager = new XtraViewScopeConnectionManager();
-
             while (true)
             {
-                if (backgroundWorker1.CancellationPending)
-                {
-                    e.Cancel = true;
-                    return;
-                }
-
-                stopwatch.Reset();
-                stopwatch.Start();
-
-                System.Diagnostics.Debug.WriteLine("time before acquisition " + stopwatch.Elapsed);
+                //Acquire the scope signal
+                stopwatch.Restart();
                 xtraViewScopeConnectionManager.StartAcquisition();
-                System.Diagnostics.Debug.WriteLine("time after acquisition " + stopwatch.Elapsed);
+                System.Diagnostics.Debug.WriteLine("acquisition complete " + stopwatch.Elapsed);
                 signalAnalyser.StartTime = xtraViewScopeConnectionManager.StartTime;
                 signalAnalyser.Waveforms = xtraViewScopeConnectionManager.Waveforms;
                 signalAnalyser.WaveformInfo = xtraViewScopeConnectionManager.WaveformInfo;
-                Program.report.ReportContents.SignalAnalysisResultContainer = signalAnalyser.analyseScopeSignal();
 
+                //Analyse the acquired signal
+                Program.reportWriter.Report.ReportContents.SignalAnalysisResultContainer = signalAnalyser.analyseScopeSignal();
+                System.Diagnostics.Debug.WriteLine("analysis complete " + stopwatch.Elapsed);
                 Program.reportWriter.OutputDirectory = OutputDirectory;
                 Program.reportWriter.FilePathString = FileNameFormat;
-                Program.reportWriter.Report = Program.report;
 
-                //Thread reportWriterThread = new Thread (Program.reportWriter.WriteReport);
-                //reportWriterThread.Start();
+                //This creates the file with the analysed data.
+                //Run in a thread so that the scope can wait for the next signal.
+                System.Diagnostics.Debug.WriteLine("report started " + stopwatch.Elapsed);
+                reportWriterThread = new Thread(Program.reportWriter.WriteReport);
+                reportWriterThread.Start();
 
-                Program.reportWriter.WriteReport();
+                //Program.reportWriter.WriteReport();
 
-                backgroundWorker1.ReportProgress(0, Program.reportWriter.FilePathString);
                 if (backgroundWorker1.CancellationPending)
                 {
                     e.Cancel = true;
                     return;
                 }
-                stopwatch.Stop();
-                System.Diagnostics.Debug.WriteLine("total time " + stopwatch.Elapsed);                
+                //Generate the link on the interface in another thread that waits for the report to be created first.
+                Thread reportProgressThread = new Thread(() => backgroundWorker1.ReportProgress(0));
+                reportProgressThread.Start();
+                System.Diagnostics.Debug.WriteLine("complete " + stopwatch.Elapsed);
             }
         }
 
 
         private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            //progressReportLabel.Text = "Wrote to: " + e.UserState.ToString();
-            progressReportLinkLabel.Text = "Wrote to: " + e.UserState.ToString();
+            //Wait for the report writer to finish so that the name is generated correctly
+            reportWriterThread.Join();
+            progressReportLinkLabel.Text = "Wrote to: " + Program.reportWriter.FilePathString;
             progressReportLinkLabel.Links.Clear();
-            progressReportLinkLabel.Links.Add(new LinkLabel.Link("Wrote to: ".Length, e.UserState.ToString().Length));
+            progressReportLinkLabel.Links.Add(new LinkLabel.Link("Wrote to: ".Length, Program.reportWriter.FullFilePath.Length));
         }
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -177,7 +209,6 @@ namespace XtraViewScopeFormApplication
             }
         }
 
-
         void ChangeControlState(bool isEnabled)
         {
             configFilePath.Enabled = isEnabled;
@@ -191,7 +222,7 @@ namespace XtraViewScopeFormApplication
         {
             if (Program.reportWriter.FilePathString != null)
             {
-                System.Diagnostics.Process.Start(Program.reportWriter.FullFilePath);
+                Process.Start(Program.reportWriter.FullFilePath);
                 progressReportLinkLabel.LinkVisited = true;
             }
         }

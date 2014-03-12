@@ -9,10 +9,8 @@ namespace XtraViewScopeFormApplication
     static class Program
     {
         public static IConfigManager configManager;
-        public static Report report;
-        //public static ReportContents reportContents;
         public static IReportWriter reportWriter = new ReportWriter();
-
+        public static object reportWriterLock = new Object();
         /// <summary>
         /// The main entry point for the application.
         /// </summary>

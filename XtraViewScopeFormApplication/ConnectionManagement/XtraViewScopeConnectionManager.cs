@@ -25,23 +25,7 @@ namespace XtraViewScope.ConnectionManagement
         public XtraViewScopeConnectionManager()
         {
             ConfigManager = Program.configManager;
-            Program.report = new Report();
 
-            if (Program.configManager.getProperty("ReportContents") != null)
-            {
-                if (Program.configManager.getProperty("ReportContents").Equals("Xml"))
-                {
-                    Program.report.ReportContents = new XmlReportContents();
-                }
-                else if (Program.configManager.getProperty("ReportContents").Equals("Json"))
-                {
-                    Program.report.ReportContents = new JsonReportContents();
-                }
-            }
-            else
-            {
-                Program.report.ReportContents = new JsonReportContents();
-            }
         }
 
         private string channelName = "0";
@@ -205,13 +189,13 @@ namespace XtraViewScope.ConnectionManagement
             }
             catch(Ivi.Driver.IviCDriverException ex)
             {
-                Program.report.ReportContents.Exceptions.Add(ex);
+                Program.reportWriter.Report.ReportContents.Exceptions.Add(ex);
             }
         }
 
         void DriverOperation_Warning(object sender, ScopeWarningEventArgs e)
         {
-            Program.report.ReportContents.EventArgs.Add(e);
+            Program.reportWriter.Report.ReportContents.EventArgs.Add(e);
         }
 
         public NIScope scopeSession;
@@ -269,7 +253,7 @@ namespace XtraViewScope.ConnectionManagement
                 }
                 catch (Exception ex)
                 {
-                    Program.report.ReportContents.Exceptions.Add(ex);
+                    Program.reportWriter.Report.ReportContents.Exceptions.Add(ex);
                 }
             }
         }
