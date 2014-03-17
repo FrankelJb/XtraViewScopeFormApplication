@@ -9,6 +9,7 @@ using System.Text;
 using XtraViewScope.Models;
 using XtraViewScope.Models.Dictionaries;
 using XtraViewScope.Models.Enums;
+using XtraViewScopeFormApplication;
 
 namespace XtraViewScope.ScopeAnalysis
 {
@@ -136,6 +137,10 @@ namespace XtraViewScope.ScopeAnalysis
                             }
                             catch (KeyNotFoundException)
                             {
+                                string logMessage = "Nibble duration was not in an acceptable range: sequence number - " + (currentAdd2PacketIndex) + 
+                                                    ", nibble number - " + (currentNibbleIndex) + ", duration found - " + 
+                                                    add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].TotalDuration.FractionalSeconds * 1000000;
+                                Program.log.Error(logMessage); 
                                 add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].IsNotValid = true;
                                 //break;
                             }

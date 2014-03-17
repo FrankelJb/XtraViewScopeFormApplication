@@ -1,0 +1,1 @@
+﻿[{"AbsoluteInitialX":15.914794,"RelativeInitialX":-0.00035,"XIncrement":5E-07,"ActualNumberOfSamples":700000,"Offset":0.0,"Gain":1.0,"Reserved1":0.0,"Reserved2":0.0}]

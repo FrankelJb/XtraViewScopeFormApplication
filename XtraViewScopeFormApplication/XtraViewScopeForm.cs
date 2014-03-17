@@ -1,4 +1,5 @@
 ﻿using ScopeLibrary.ConfigManagement;
+using ScopeLibrary.ConnectionManagement;
 using ScopeLibrary.ReportWriting;
 using ScopeLibrary.SignalAnalysis;
 using System;
@@ -18,11 +19,13 @@ namespace XtraViewScopeFormApplication
         public XtraViewScopeForm()
         {
             InitializeComponent();
+            Program.log.Info("Form initialised");
 
-            initializeScopeComponents();
+            initialiseScopeConfigurationComponenents();
+            Program.log.Info("Scope configuration components initialised");
         }
 
-        private void initializeScopeComponents()
+        private void initialiseScopeConfigurationComponenents()
         {
             //Try and find a config file in the directory of the application
             foreach (string filename in Directory.GetFiles(@"."))
@@ -46,6 +49,8 @@ namespace XtraViewScopeFormApplication
 
         private void startButton_Click(object sender, EventArgs e)
         {
+            //startButton.Text = "Busy...";
+            pictureBox1.Image = Properties.Resources.Busy;
             progressReportLinkLabel.Text = "";
             progressReportLinkLabel.Links.Clear();
             ChangeControlState(false);
@@ -69,7 +74,7 @@ namespace XtraViewScopeFormApplication
             }
             else
             {
-                Program.reportWriter.Report.ReportContents = new JsonReportContents();
+                Program.reportWriter.Report.ReportContents = new XmlReportContents();
             }
 
             //Do the work using a background worker to free the UI
@@ -82,44 +87,39 @@ namespace XtraViewScopeFormApplication
         //It is invoked using a background worker so that the UI does not appear to freeze and the user can stop the application.
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
-            Stopwatch stopwatch = new Stopwatch();
-
             SignalAnalyser signalAnalyser = new Add2SignalAnalyser();
 
-            XtraViewScopeConnectionManager xtraViewScopeConnectionManager = new XtraViewScopeConnectionManager();
+            IScopeConnectionManager xtraViewScopeConnectionManager = new XtraViewScopeConnectionManager();
+            int count = 0;
             while (true)
             {
+                count++;
                 //Acquire the scope signal
-                stopwatch.Restart();
                 xtraViewScopeConnectionManager.StartAcquisition();
-                System.Diagnostics.Debug.WriteLine("acquisition complete " + stopwatch.Elapsed);
+                Program.log.Info("Scope acquisition started for the " + ScopeLibrary.Util.NumberToString.AddOrdinal(count) + " time");
                 signalAnalyser.StartTime = xtraViewScopeConnectionManager.StartTime;
                 signalAnalyser.Waveforms = xtraViewScopeConnectionManager.Waveforms;
                 signalAnalyser.WaveformInfo = xtraViewScopeConnectionManager.WaveformInfo;
 
                 //Analyse the acquired signal
                 Program.reportWriter.Report.ReportContents.SignalAnalysisResultContainer = signalAnalyser.analyseScopeSignal();
-                System.Diagnostics.Debug.WriteLine("analysis complete " + stopwatch.Elapsed);
                 Program.reportWriter.OutputDirectory = OutputDirectory;
                 Program.reportWriter.FilePathString = FileNameFormat;
 
                 //This creates the file with the analysed data.
                 //Run in a thread so that the scope can wait for the next signal.
-                System.Diagnostics.Debug.WriteLine("report started " + stopwatch.Elapsed);
                 reportWriterThread = new Thread(Program.reportWriter.WriteReport);
                 reportWriterThread.Start();
-
-                //Program.reportWriter.WriteReport();
 
                 if (backgroundWorker1.CancellationPending)
                 {
                     e.Cancel = true;
+                    Program.log.Info("Acquisition cancelled by user, stopping");
                     return;
                 }
                 //Generate the link on the interface in another thread that waits for the report to be created first.
                 Thread reportProgressThread = new Thread(() => backgroundWorker1.ReportProgress(0));
                 reportProgressThread.Start();
-                System.Diagnostics.Debug.WriteLine("complete " + stopwatch.Elapsed);
             }
         }
 
@@ -127,10 +127,13 @@ namespace XtraViewScopeFormApplication
         private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             //Wait for the report writer to finish so that the name is generated correctly
+            pictureBox1.Image = Properties.Resources.WritingReport;
             reportWriterThread.Join();
-            progressReportLinkLabel.Text = "Wrote to: " + Program.reportWriter.FilePathString;
+            Program.log.Info("Wrote to: " + Program.reportWriter.FullFilePath);
+            progressReportLinkLabel.Text = "Wrote to: " + Program.reportWriter.FullFilePath;
             progressReportLinkLabel.Links.Clear();
             progressReportLinkLabel.Links.Add(new LinkLabel.Link("Wrote to: ".Length, Program.reportWriter.FullFilePath.Length));
+            pictureBox1.Image = Properties.Resources.Busy;
         }
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -145,13 +148,15 @@ namespace XtraViewScopeFormApplication
                 MessageBox.Show("Error. " + (e.Error as Exception).ToString());
                 progressReportLinkLabel.Text = "Error";
                 progressReportLinkLabel.Links.Clear();
+                Program.log.Fatal((e.Error as Exception).ToString(), e.Error as Exception);
             }
             else
             {
                 progressReportLinkLabel.Text = "The task has been completed. Results: " + e.Result.ToString();
                 progressReportLinkLabel.Links.Clear();
             }
-            
+
+            pictureBox1.Image = null;
             ChangeControlState(true);
         }
 
@@ -159,6 +164,7 @@ namespace XtraViewScopeFormApplication
         {
             if (backgroundWorker1.IsBusy)
             {
+                pictureBox1.Image = Properties.Resources.Stopping;
                 progressReportLinkLabel.Text = "Stopping...";
                 progressReportLinkLabel.Links.Clear();
             }

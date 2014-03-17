@@ -44,6 +44,8 @@ namespace XtraViewScopeFormApplication
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.progressReportLinkLabel = new System.Windows.Forms.LinkLabel();
             this.fileFormatInformationLabel = new System.Windows.Forms.Label();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // startButton
@@ -156,15 +158,24 @@ namespace XtraViewScopeFormApplication
             this.fileFormatInformationLabel.AutoSize = true;
             this.fileFormatInformationLabel.Location = new System.Drawing.Point(347, 119);
             this.fileFormatInformationLabel.Name = "fileFormatInformationLabel";
-            this.fileFormatInformationLabel.Size = new System.Drawing.Size(316, 13);
+            this.fileFormatInformationLabel.Size = new System.Drawing.Size(303, 13);
             this.fileFormatInformationLabel.TabIndex = 11;
             this.fileFormatInformationLabel.Text = "\"_yyyyMMddHHmmssfff.format\" will automatically be appended";
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Location = new System.Drawing.Point(399, 141);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(100, 23);
+            this.pictureBox1.TabIndex = 12;
+            this.pictureBox1.TabStop = false;
             // 
             // XtraViewScopeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(674, 172);
+            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.fileFormatInformationLabel);
             this.Controls.Add(this.progressReportLinkLabel);
             this.Controls.Add(this.stopButton);
@@ -179,6 +190,7 @@ namespace XtraViewScopeFormApplication
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "XtraViewScopeForm";
             this.Text = "XtraViewScope";
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -199,6 +211,7 @@ namespace XtraViewScopeFormApplication
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.LinkLabel progressReportLinkLabel;
         private System.Windows.Forms.Label fileFormatInformationLabel;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }
 

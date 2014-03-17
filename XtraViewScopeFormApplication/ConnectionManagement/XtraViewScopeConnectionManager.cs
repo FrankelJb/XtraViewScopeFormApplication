@@ -189,7 +189,7 @@ namespace XtraViewScope.ConnectionManagement
             }
             catch(Ivi.Driver.IviCDriverException ex)
             {
-                Program.reportWriter.Report.ReportContents.Exceptions.Add(ex);
+                Program.log.Error(ex);
             }
         }
 
@@ -253,7 +253,7 @@ namespace XtraViewScope.ConnectionManagement
                 }
                 catch (Exception ex)
                 {
-                    Program.reportWriter.Report.ReportContents.Exceptions.Add(ex);
+                    Program.log.Error(ex);
                 }
             }
         }

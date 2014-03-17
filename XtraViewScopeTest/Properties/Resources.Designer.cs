@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace XtraViewScopeFormApplication.Properties {
+namespace XtraViewScopeTest.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace XtraViewScopeFormApplication.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("XtraViewScopeFormApplication.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("XtraViewScopeTest.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,32 +61,17 @@ namespace XtraViewScopeFormApplication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        ///   Looks up a localized string similar to &lt;ScopeProperties&gt;
+        ///  &lt;ChannelNumber&gt;0&lt;/ChannelNumber&gt;
+        ///  &lt;SampleRate&gt;2000000&lt;/SampleRate&gt;
+        ///  &lt;SampleRateMin&gt;2000000&lt;/SampleRateMin&gt;
+        ///  &lt;NumberOfPointsMin&gt;700000&lt;/NumberOfPointsMin&gt;
+        ///  &lt;ReportContents&gt;Xml&lt;/ReportContents&gt;
+        ///&lt;/ScopeProperties&gt;.
         /// </summary>
-        internal static System.Drawing.Bitmap Busy {
+        internal static string ScopeConfiguration {
             get {
-                object obj = ResourceManager.GetObject("Busy", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap Stopping {
-            get {
-                object obj = ResourceManager.GetObject("Stopping", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap WritingReport {
-            get {
-                object obj = ResourceManager.GetObject("WritingReport", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
+                return ResourceManager.GetString("ScopeConfiguration", resourceCulture);
             }
         }
     }
