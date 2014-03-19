@@ -49,7 +49,7 @@ namespace XtraViewScopeFormApplication
 
         private void startButton_Click(object sender, EventArgs e)
         {
-            //startButton.Text = "Busy...";
+            startButton.Text = "0";
             pictureBox1.Image = Properties.Resources.Busy;
             progressReportLinkLabel.Text = "";
             progressReportLinkLabel.Links.Clear();
@@ -93,7 +93,6 @@ namespace XtraViewScopeFormApplication
             int count = 0;
             while (true)
             {
-                count++;
                 //Acquire the scope signal
                 xtraViewScopeConnectionManager.StartAcquisition();
                 Program.log.Info("Scope acquisition started for the " + ScopeLibrary.Util.NumberToString.AddOrdinal(count) + " time");
@@ -118,8 +117,9 @@ namespace XtraViewScopeFormApplication
                     return;
                 }
                 //Generate the link on the interface in another thread that waits for the report to be created first.
-                Thread reportProgressThread = new Thread(() => backgroundWorker1.ReportProgress(0));
+                Thread reportProgressThread = new Thread(() => backgroundWorker1.ReportProgress(count));
                 reportProgressThread.Start();
+                count++;
             }
         }
 
@@ -127,13 +127,12 @@ namespace XtraViewScopeFormApplication
         private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             //Wait for the report writer to finish so that the name is generated correctly
-            pictureBox1.Image = Properties.Resources.WritingReport;
             reportWriterThread.Join();
             Program.log.Info("Wrote to: " + Program.reportWriter.FullFilePath);
             progressReportLinkLabel.Text = "Wrote to: " + Program.reportWriter.FullFilePath;
+            startButton.Text = e.ProgressPercentage.ToString();
             progressReportLinkLabel.Links.Clear();
             progressReportLinkLabel.Links.Add(new LinkLabel.Link("Wrote to: ".Length, Program.reportWriter.FullFilePath.Length));
-            pictureBox1.Image = Properties.Resources.Busy;
         }
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -157,6 +156,7 @@ namespace XtraViewScopeFormApplication
             }
 
             pictureBox1.Image = null;
+            startButton.Text = "Start";
             ChangeControlState(true);
         }
 

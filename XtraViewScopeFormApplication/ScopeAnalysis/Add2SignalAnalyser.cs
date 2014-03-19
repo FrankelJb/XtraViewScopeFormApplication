@@ -43,8 +43,8 @@ namespace XtraViewScope.ScopeAnalysis
                 sb.Append("\t");
                 sb.Append(waveform.Samples[i].Value.ToString());
                 sb.Append(Environment.NewLine);
-                //Lets make sure that we have the proper amplitude, direction doesn't matter
-                double currentValue = Math.Abs(waveform.Samples[i].Value);
+                //Lets make sure that we have the proper amplitude, direction doesn't matter. Rounding to avoid 0.99999... != 1 (Which is false)
+                double currentValue = Math.Round(Math.Abs(waveform.Samples[i].Value), 3);
                 if (currentValue < 0.5)
                 {
                     if (currentAdd2Packet == null)
@@ -80,8 +80,9 @@ namespace XtraViewScope.ScopeAnalysis
                         }
                         if (isNoise)
                         {
-                            //We've found the start of the noise and the end of the pulse
-                            add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].PulseEndTime = period;
+                            //We've found the start of the noise and the end of the pulse.
+                            //The end time of the pulse will be one x-increment before the start of the noise
+                            add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].PulseEndTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
                             add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].NoiseStartTime = period;
                         }
                     }
@@ -102,13 +103,12 @@ namespace XtraViewScope.ScopeAnalysis
                         if (add2Packets[currentAdd2PacketIndex].Nibbles.Count == 0)
                         {
                             //If this is the first nibble then we can use this startTime for the first peak value.
-                            currentNibble.PulseStartTime = period;
-                            //currentNibble.PulseDuration.Total = startTime.FractionalSeconds; //TODO: Change this total time so that its meaningful or gone
+                            currentNibble.PulseStartTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
                         }
                         else
                         {
-                            //Otherwise we should use the end of the noise from the previous nibble for the startTime
-                            currentNibble.PulseStartTime = add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex - 1].NoiseEndTime;
+                            //Otherwise we should use the end of the noise from the previous nibble for the startTime plus the x-increment
+                            currentNibble.PulseStartTime = add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex - 1].NoiseEndTime + PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
                             //currentNibble.pulseDuration.totalTime = startTime.FractionalSeconds; //TODO: same for this one
                         }
 
@@ -118,7 +118,8 @@ namespace XtraViewScope.ScopeAnalysis
                     else if (add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].NoiseStartTime.FractionalSeconds != 0.0 &&
                         add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].NoiseEndTime.FractionalSeconds == 0.0)
                     {
-                        add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].NoiseEndTime = period;
+                        //We've found the start of the next pulse so set the end of the noise to one x-increment before
+                        add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].NoiseEndTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
 
                         //If the currentNibble is the ninth nibble then we've finished with this packet and we should move onto the next one
                         if (currentNibbleIndex == 8)
@@ -133,13 +134,13 @@ namespace XtraViewScope.ScopeAnalysis
                             try
                             {
                                 add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].BinaryValue =
-                                    Add2Dictionary.GetBinaryData(add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].TotalDuration.FractionalSeconds * 1000000);
+                                    Add2Dictionary.GetBinaryData(ScopeLibrary.Util.TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].TotalDuration));
                             }
                             catch (KeyNotFoundException)
                             {
-                                string logMessage = "Nibble duration was not in an acceptable range: sequence number - " + (currentAdd2PacketIndex) + 
-                                                    ", nibble number - " + (currentNibbleIndex) + ", duration found - " + 
-                                                    add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].TotalDuration.FractionalSeconds * 1000000;
+                                string logMessage = "Nibble duration was not in an acceptable range: sequence number " + (currentAdd2PacketIndex) + 
+                                                    ", nibble number " + (currentNibbleIndex) + ", duration found " + 
+                                                    ScopeLibrary.Util.TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].TotalDuration);
                                 Program.log.Error(logMessage); 
                                 add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].IsNotValid = true;
                                 //break;

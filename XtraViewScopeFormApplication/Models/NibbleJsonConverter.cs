@@ -44,7 +44,7 @@ namespace XtraViewScope.Models
                 o.Property("NoiseDuration").Value = JToken.FromObject(Math.Round(TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(nibble.NoiseDuration), 3));
                 o.Property("TotalDuration").Value = JToken.FromObject(Math.Round(TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(nibble.TotalDuration), 3));
 
-                o.Property("TimeDeviation").Value = JObject.Parse(" { " + ScopeLibrary.Util.TimeDeviation.GradeDeviation(nibble.TimeDeviation) + " : " + JToken.FromObject(Math.Round(nibble.TimeDeviation, 3)) + " } ");
+                o.Property("TimeDeviation").Value = JObject.Parse(" { " + ScopeLibrary.Util.TimeDeviation.GradeDeviation(Math.Abs(nibble.TimeDeviation)) + " : " + JToken.FromObject(Math.Round(nibble.TimeDeviation, 3)) + " } ");
 
                 if (nibble.NibbleStatus == null)
                 {

@@ -27,6 +27,7 @@ namespace XtraViewScope.Models
         b1100 = 12,
         b1101 = 13,
         b1110 = 14,
-        b1111 = 15
+        b1111 = 15,
+        None
     }
 }

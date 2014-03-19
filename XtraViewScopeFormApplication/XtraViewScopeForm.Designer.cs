@@ -45,6 +45,7 @@ namespace XtraViewScopeFormApplication
             this.progressReportLinkLabel = new System.Windows.Forms.LinkLabel();
             this.fileFormatInformationLabel = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.counterLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -170,11 +171,20 @@ namespace XtraViewScopeFormApplication
             this.pictureBox1.TabIndex = 12;
             this.pictureBox1.TabStop = false;
             // 
+            // counterLabel
+            // 
+            this.counterLabel.AutoSize = true;
+            this.counterLabel.Location = new System.Drawing.Point(358, 146);
+            this.counterLabel.Name = "counterLabel";
+            this.counterLabel.Size = new System.Drawing.Size(0, 13);
+            this.counterLabel.TabIndex = 13;
+            // 
             // XtraViewScopeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(674, 172);
+            this.Controls.Add(this.counterLabel);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.fileFormatInformationLabel);
             this.Controls.Add(this.progressReportLinkLabel);
@@ -212,6 +222,7 @@ namespace XtraViewScopeFormApplication
         private System.Windows.Forms.LinkLabel progressReportLinkLabel;
         private System.Windows.Forms.Label fileFormatInformationLabel;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Label counterLabel;
     }
 }
 

@@ -94,6 +94,38 @@ namespace XtraViewScope.Models.Dictionaries
         }
 
         /// <summary>
+        /// Get the failed duration of the nibble.
+        /// 
+        /// If a nibble's duration falls outside of the valid ranges, we must be able to return a deviation from a valid duration.
+        /// </summary>
+        /// <param name="nibbleDuration">duration of nibble calculated as pulse duration + noise duration</param>
+        /// <returns>possible optimal duration for nibble range</returns>
+        public static double GetFailedOptimalDuration(double nibbleDuration)
+        {
+            double optimalDuration = 0;
+            if (nibbleDuration < 915)
+            {
+                optimalDuration = (915 + 1025) / 2;
+            }
+            else if (nibbleDuration > 3076)
+            {
+                optimalDuration = (2965 + 3076) / 2;
+            }
+            else
+            {
+                foreach (NibbleKey key in NibbleDictionary.Keys)
+                {
+                    if (key.UpperLimit < nibbleDuration)
+                    {
+                        optimalDuration = (key.LowerLimit + key.UpperLimit) / 2;
+                    }
+                }
+            }
+
+            return optimalDuration;
+        }
+
+        /// <summary>
         /// The nibble key's are used when looking up the binary value of a nibble's duration.
         /// 
         /// The key is defined using the nibble decoding total time lower limit and the nibble decoding total time upper limit.

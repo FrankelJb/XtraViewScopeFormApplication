@@ -1,18 +1,8 @@
 ﻿using NationalInstruments;
 using NationalInstruments.ModularInstruments.NIScope;
-using Newtonsoft.Json;
 using ScopeLibrary;
 using ScopeLibrary.ConnectionManagement;
-using ScopeLibrary.ReportWriting;
-using ScopeLibrary.SignalAnalysis;
 using System;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Text;
-using XtraViewScope.Models;
-using XtraViewScope.Models.Dictionaries;
-using XtraViewScope.ReportWriting;
-using XtraViewScope.ScopeAnalysis;
 using XtraViewScopeFormApplication;
 
 namespace XtraViewScope.ConnectionManagement

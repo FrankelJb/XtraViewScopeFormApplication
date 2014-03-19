@@ -65,7 +65,6 @@
     </Compile>
     <Compile Include="Models\Add2Packet.cs" />
     <Compile Include="Models\Dictionaries\Add2Dictionary.cs" />
-    <Compile Include="Models\Enums\Add2PacketStatus.cs" />
     <Compile Include="Models\Enums\BinaryData.cs" />
     <Compile Include="Models\Enums\HeartbeatStatus.cs" />
     <Compile Include="Models\Enums\MessageType.cs" />
@@ -121,6 +120,7 @@
     <None Include="Resources\Stopping.gif" />
     <None Include="Resources\WritingReport.gif" />
     <None Include="Resources\Busy.gif" />
+    <Content Include="Resources\dataPoints.txt" />
     <Content Include="Resources\ScopeConfiguration.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -135,7 +135,8 @@ namespace XtraViewScope.Models
                 {
                     nibbleStatus ="Nibble duration does not fall within available ranges";
                     IsNotValid = true;
-                    return -1;
+
+                    return Add2Dictionary.GetFailedOptimalDuration(TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(TotalDuration));
                 }
             }
         }
@@ -144,7 +145,7 @@ namespace XtraViewScope.Models
         {
             get
             {
-                return Math.Abs(TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(TotalDuration) - OptimalDuration);
+                return TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(TotalDuration) - OptimalDuration;
             }
         }
 

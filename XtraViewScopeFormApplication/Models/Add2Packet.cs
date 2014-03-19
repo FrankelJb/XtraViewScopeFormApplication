@@ -106,7 +106,7 @@ namespace XtraViewScope.Models
             {
                 if (nibbles != null && nibbles.Count > 3)
                 {
-                    if (Nibbles[2].IsNotValid)
+                    if (Nibbles[3].IsNotValid)
                     {
                         status.Add("The nibble containing the sequence number has either not been captured or the ADD2 Packet is malformed.");
                         return -1;
