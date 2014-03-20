@@ -23,11 +23,12 @@ namespace XtraViewScope.ConnectionManagement
         {
             get
             {
-                return ConfigManager.getProperty("ChannelName");
-            }
-            set
-            {
-                channelName = value;
+                if (ConfigManager.getProperty("ChannelName") != null)
+                {
+                    channelName = ConfigManager.getProperty("ChannelName");
+                }
+
+                return channelName;
             }
         }    
 
@@ -40,11 +41,8 @@ namespace XtraViewScope.ConnectionManagement
                 {
                     resourceName = ConfigManager.getProperty("ResourceName");
                 }
+
                 return resourceName;
-            }
-            set
-            {
-                resourceName = value;
             }
         }
 
@@ -66,10 +64,6 @@ namespace XtraViewScope.ConnectionManagement
                  
                 return idQuery;
             }
-            set
-            {
-                idQuery = value;
-            }
         }
 
         private bool resetDevice = false;
@@ -89,10 +83,6 @@ namespace XtraViewScope.ConnectionManagement
                 }
 
                 return resetDevice;
-            }
-            set
-            {
-                resetDevice = value;
             }
         }
 
@@ -114,10 +104,6 @@ namespace XtraViewScope.ConnectionManagement
 
                 return timeout;
             }
-            set
-            {
-                timeout = value;
-            }
         }
 
         private long numberOfMeasurentSamplesToFetch = 400;
@@ -137,10 +123,6 @@ namespace XtraViewScope.ConnectionManagement
                 }
 
                 return numberOfMeasurentSamplesToFetch;
-            }
-            set
-            {
-                numberOfMeasurentSamplesToFetch = value;
             }
         }
 
@@ -320,10 +302,6 @@ namespace XtraViewScope.ConnectionManagement
 
                 return coupling;
             }
-            set
-            {
-                coupling = value;
-            }
         }
 
         private double offset = 0.0;
@@ -342,10 +320,6 @@ namespace XtraViewScope.ConnectionManagement
                     }
                 }
                 return offset;
-            }
-            set
-            {
-                offset = value;
             }
         }
 
@@ -367,10 +341,6 @@ namespace XtraViewScope.ConnectionManagement
                 
                 return probeAttenuation;
             }
-            set
-            {
-                probeAttenuation = value;
-            }
         }
 
         private double verticalRange = 4.0;
@@ -390,10 +360,6 @@ namespace XtraViewScope.ConnectionManagement
                 }
 
                 return verticalRange;
-            }
-            set
-            {
-                verticalRange = value;
             }
         }
 
@@ -425,10 +391,6 @@ namespace XtraViewScope.ConnectionManagement
 
                 return enforceRealTime;
             }
-            set
-            {
-                enforceRealTime = value;
-            }
         }
 
         //This value can only be 1 with the NI USB-5133 scope.
@@ -450,10 +412,6 @@ namespace XtraViewScope.ConnectionManagement
 
                 return numberOfRecords;
             }
-            set
-            {
-                numberOfRecords = value;
-            }
         }
 
         private int numberOfPointsMin = 70000;
@@ -473,10 +431,6 @@ namespace XtraViewScope.ConnectionManagement
                 }
 
                 return numberOfPointsMin;
-            }
-            set
-            {
-                numberOfPointsMin = value;
             }
         }
 
@@ -498,10 +452,6 @@ namespace XtraViewScope.ConnectionManagement
 
                 return referencePosition;
             }
-            set
-            {
-                referencePosition = value;
-            }
         }
 
         private double sampleRateMin = 200000;
@@ -520,10 +470,6 @@ namespace XtraViewScope.ConnectionManagement
                     }
                 }
                 return sampleRateMin;
-            }
-            set
-            {
-                sampleRateMin = value;
             }
         }
 
