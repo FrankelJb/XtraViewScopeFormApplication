@@ -88,14 +88,38 @@ namespace XtraViewScopeFormApplication
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
             SignalAnalyser signalAnalyser = new Add2SignalAnalyser();
+            TimeSpan totalRunTime = new TimeSpan();
+            TimeSpan shortestRunTime = TimeSpan.MaxValue;
+            TimeSpan longestRunTime = TimeSpan.MinValue;
+            Stopwatch stopwatch = new Stopwatch();
 
             IScopeConnectionManager xtraViewScopeConnectionManager = new XtraViewScopeConnectionManager();
-            int count = 0;
+
+            //The first time the hearbeat is sensed can be 0.0 < currentTime < 30.0 seconds. 
+            //This data disrupts the timing captured below, so make sure that it isn't included by ignoring the first heartbeat
+            xtraViewScopeConnectionManager.StartAcquisition();
+
+            int count = 1;
             while (true)
             {
                 //Acquire the scope signal
+                stopwatch.Restart();
                 xtraViewScopeConnectionManager.StartAcquisition();
-                Program.log.Info("Scope acquisition started for the " + ScopeLibrary.Util.NumberToString.AddOrdinal(count) + " time");
+                Program.log.Info("Scope acquisition completed for the " + ScopeLibrary.Util.NumberToString.AddOrdinal(count) + " time");
+
+                stopwatch.Stop();
+                if (stopwatch.Elapsed < shortestRunTime)
+                {
+                    shortestRunTime = stopwatch.Elapsed;
+                } 
+
+                if (stopwatch.Elapsed > longestRunTime)
+                {
+                    longestRunTime = stopwatch.Elapsed;
+                }
+
+                totalRunTime += stopwatch.Elapsed;
+
                 signalAnalyser.StartTime = xtraViewScopeConnectionManager.StartTime;
                 signalAnalyser.Waveforms = xtraViewScopeConnectionManager.Waveforms;
                 signalAnalyser.WaveformInfo = xtraViewScopeConnectionManager.WaveformInfo;
@@ -117,7 +141,8 @@ namespace XtraViewScopeFormApplication
                     return;
                 }
                 //Generate the link on the interface in another thread that waits for the report to be created first.
-                Thread reportProgressThread = new Thread(() => backgroundWorker1.ReportProgress(count));
+                int passCount = count;
+                Thread reportProgressThread = new Thread(() => backgroundWorker1.ReportProgress(passCount, new HeartbeatTiming(totalRunTime.TotalSeconds / passCount, shortestRunTime, longestRunTime)));
                 reportProgressThread.Start();
                 count++;
             }
@@ -126,6 +151,14 @@ namespace XtraViewScopeFormApplication
 
         private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
+            HeartbeatTiming heartbeatTiming = (HeartbeatTiming) e.UserState;
+            Program.log.Info("Average: " + Math.Round(heartbeatTiming.Average, 3) + " seconds");
+            averageLabel.Text = "Average: " + Math.Round(heartbeatTiming.Average, 3) + " seconds";
+            Program.log.Info("Shortest: " + Math.Round(heartbeatTiming.Shortest.TotalSeconds, 3) + " seconds");
+            shortestLabel.Text =  "Shortest: " + Math.Round(heartbeatTiming.Shortest.TotalSeconds, 3) + " seconds";
+            Program.log.Info("Longest: " + Math.Round(heartbeatTiming.Longest.TotalSeconds, 3) + " seconds");
+            longestLabel.Text = "Longest: " + Math.Round(heartbeatTiming.Longest.TotalSeconds, 3) + " seconds";
+
             //Wait for the report writer to finish so that the name is generated correctly
             reportWriterThread.Join();
             Program.log.Info("Wrote to: " + Program.reportWriter.FullFilePath);
@@ -139,6 +172,8 @@ namespace XtraViewScopeFormApplication
         {
             if (e.Cancelled)
             {
+                reportWriterThread.Join();
+                Program.log.Info("Wrote to: " + Program.reportWriter.FullFilePath);
                 progressReportLinkLabel.Text = "Cancelled scope signal analysis";
                 progressReportLinkLabel.Links.Clear();
             }
@@ -165,7 +200,6 @@ namespace XtraViewScopeFormApplication
             if (backgroundWorker1.IsBusy)
             {
                 pictureBox1.Image = Properties.Resources.Stopping;
-                progressReportLinkLabel.Text = "Stopping...";
                 progressReportLinkLabel.Links.Clear();
             }
             backgroundWorker1.CancelAsync();
@@ -231,6 +265,19 @@ namespace XtraViewScopeFormApplication
                 Process.Start(Program.reportWriter.FullFilePath);
                 progressReportLinkLabel.LinkVisited = true;
             }
+        }
+    }
+
+    public class HeartbeatTiming
+    {
+        public double Average { get; set; }
+        public TimeSpan Shortest { get; set; }
+        public TimeSpan Longest { get; set; }
+        public HeartbeatTiming(double average, TimeSpan shortest, TimeSpan longest)
+        {
+            Average = average;
+            Shortest = shortest;
+            Longest = longest;
         }
     }
 }

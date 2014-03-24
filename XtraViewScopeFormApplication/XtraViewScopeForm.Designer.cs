@@ -46,6 +46,9 @@ namespace XtraViewScopeFormApplication
             this.fileFormatInformationLabel = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.counterLabel = new System.Windows.Forms.Label();
+            this.averageLabel = new System.Windows.Forms.Label();
+            this.shortestLabel = new System.Windows.Forms.Label();
+            this.longestLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -179,11 +182,41 @@ namespace XtraViewScopeFormApplication
             this.counterLabel.Size = new System.Drawing.Size(0, 13);
             this.counterLabel.TabIndex = 13;
             // 
+            // averageLabel
+            // 
+            this.averageLabel.AutoSize = true;
+            this.averageLabel.Location = new System.Drawing.Point(12, 173);
+            this.averageLabel.Name = "averageLabel";
+            this.averageLabel.Size = new System.Drawing.Size(53, 13);
+            this.averageLabel.TabIndex = 14;
+            this.averageLabel.Text = "Average: ";
+            // 
+            // shortestLabel
+            // 
+            this.shortestLabel.AutoSize = true;
+            this.shortestLabel.Location = new System.Drawing.Point(12, 197);
+            this.shortestLabel.Name = "shortestLabel";
+            this.shortestLabel.Size = new System.Drawing.Size(49, 13);
+            this.shortestLabel.TabIndex = 15;
+            this.shortestLabel.Text = "Shortest:";
+            // 
+            // longestLabel
+            // 
+            this.longestLabel.AutoSize = true;
+            this.longestLabel.Location = new System.Drawing.Point(12, 219);
+            this.longestLabel.Name = "longestLabel";
+            this.longestLabel.Size = new System.Drawing.Size(45, 13);
+            this.longestLabel.TabIndex = 16;
+            this.longestLabel.Text = "Longest";
+            // 
             // XtraViewScopeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(674, 172);
+            this.ClientSize = new System.Drawing.Size(674, 242);
+            this.Controls.Add(this.longestLabel);
+            this.Controls.Add(this.shortestLabel);
+            this.Controls.Add(this.averageLabel);
             this.Controls.Add(this.counterLabel);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.fileFormatInformationLabel);
@@ -223,6 +256,9 @@ namespace XtraViewScopeFormApplication
         private System.Windows.Forms.Label fileFormatInformationLabel;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Label counterLabel;
+        private System.Windows.Forms.Label averageLabel;
+        private System.Windows.Forms.Label shortestLabel;
+        private System.Windows.Forms.Label longestLabel;
     }
 }
 
