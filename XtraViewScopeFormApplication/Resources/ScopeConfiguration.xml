@@ -1,21 +1,18 @@
 ﻿<ScopeProperties>
-  <!-- These are the application properties-->
-  <ReportContents>Xml</ReportContents>
   <!-- These are the scope properties -->
-  <ChannelNumber>0</ChannelNumber>
+  <ChannelName>0</ChannelName>
   <Coupling>DC</Coupling>
   <IdQuery>false</IdQuery>
-  <NumberOfMeasurentSamplesToFetch>-1</NumberOfMeasurentSamplesToFetch>
-  <NumberOfPointsMin>700000</NumberOfPointsMin>
+  <NumberOfMeasurentSamplesToFetch>400</NumberOfMeasurentSamplesToFetch>
+  <NumberOfPointsMin>70000</NumberOfPointsMin>
   <NumberOfRecords>1</NumberOfRecords>
   <Offset>0.0</Offset>
   <ProbeAttenuation>1.0</ProbeAttenuation>
   <ReferencePosition>0.10</ReferencePosition>
-  <ReportContents>Xml</ReportContents>
+  <ReportContents>XmlAndJson</ReportContents>
   <ResetDevice>false</ResetDevice>
   <ResourceName>Dev1</ResourceName>
-  <SampleRate>2000000</SampleRate>
-  <SampleRateMin>2000000</SampleRateMin>
+  <SampleRateMin>200000</SampleRateMin>
   <ScopeTriggerType>Edge</ScopeTriggerType>
   <Timeout>-1</Timeout>
   <VerticalRange>4.0</VerticalRange>

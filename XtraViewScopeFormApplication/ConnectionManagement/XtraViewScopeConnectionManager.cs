@@ -167,7 +167,7 @@ namespace XtraViewScope.ConnectionManagement
 
         void DriverOperation_Warning(object sender, ScopeWarningEventArgs e)
         {
-            Program.reportWriter.Report.ReportContents.EventArgs.Add(e);
+            Program.log.Error(e);
         }
 
         public NIScope scopeSession;
@@ -243,7 +243,7 @@ namespace XtraViewScope.ConnectionManagement
             {
                 try
                 {
-                    scopeTriggerString = ConfigManager.getProperty("NumberOfMeasurentSamplesToFetch");
+                    scopeTriggerString = ConfigManager.getProperty("ScopeTriggerType");
                 }
                 catch (FormatException)
                 {

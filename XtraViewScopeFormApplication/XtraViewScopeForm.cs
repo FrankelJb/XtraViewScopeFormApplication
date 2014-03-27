@@ -3,6 +3,7 @@ using ScopeLibrary.ConnectionManagement;
 using ScopeLibrary.ReportWriting;
 using ScopeLibrary.SignalAnalysis;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -45,6 +46,34 @@ namespace XtraViewScopeFormApplication
             {
                 Program.configManager = new XmlConfigManager();
             }
+
+            //Load the config file and set the default save file format
+            Program.configManager.ConfigFilePath = Path.GetFullPath(ConfigFilePath);
+            Program.configManager.loadConfigDocument();
+
+            //Set the file name to be <device name>_<channel_number>
+            string deviceAndChannel = "";
+            if (Program.configManager.getProperty("ResourceName") != null)
+            {
+                deviceAndChannel += Program.configManager.getProperty("ResourceName");
+            }
+            else
+            {
+                deviceAndChannel += "Dev1";
+            }
+
+            deviceAndChannel += "_";
+            if (Program.configManager.getProperty("ChannelName") != null)
+            {
+                deviceAndChannel += Program.configManager.getProperty("ChannelName");
+            }
+            else
+            {
+                deviceAndChannel += "0";
+            }
+
+            FileNameFormat = deviceAndChannel;
+
         }
 
         private void startButton_Click(object sender, EventArgs e)
@@ -53,35 +82,59 @@ namespace XtraViewScopeFormApplication
             pictureBox1.Image = Properties.Resources.Busy;
             progressReportLinkLabel.Text = "";
             progressReportLinkLabel.Links.Clear();
+
+            averageLabel.Text = "Average: ";
+            shortestLabel.Text = "Shortest: ";
+            longestLabel.Text = "Longest: ";
+
             ChangeControlState(false);
 
-            //Instantiate the report object and parse the config file
-            Program.reportWriter.Report = new Report();
-            Program.configManager.ConfigFilePath = Path.GetFullPath(ConfigFilePath);
-            Program.configManager.loadConfigDocument();
+            //We need new reportWriters each time the acquisition is started based on the configs
+            Program.reportWriters = new List<IReportWriter>();
 
             //Set the report content type
             if (Program.configManager.getProperty("ReportContents") != null)
             {
                 if (Program.configManager.getProperty("ReportContents").Equals("Xml"))
                 {
-                    Program.reportWriter.Report.ReportContents = new XmlReportContents();
+                    IReportWriter reportWriter = new ReportWriter();
+                    reportWriter.Report = new Report();
+                    reportWriter.Report.ReportContents = new XmlReportContents();
+                    Program.reportWriters.Add(reportWriter);
                 }
                 else if (Program.configManager.getProperty("ReportContents").Equals("Json"))
                 {
-                    Program.reportWriter.Report.ReportContents = new JsonReportContents();
+                    IReportWriter reportWriter = new ReportWriter();
+                    reportWriter.Report = new Report();
+                    reportWriter.Report.ReportContents = new JsonReportContents();
+                    Program.reportWriters.Add(reportWriter);
+                }
+                else if (Program.configManager.getProperty("ReportContents").Equals("XmlAndJson"))
+                {
+                    IReportWriter reportWriter = new ReportWriter();
+                    reportWriter.Report = new Report();
+                    reportWriter.Report.ReportContents = new XmlReportContents();
+                    Program.reportWriters.Add(reportWriter);
+                    
+                    reportWriter = new ReportWriter();
+                    reportWriter.Report = new Report();
+                    reportWriter.Report.ReportContents = new JsonReportContents();
+                    Program.reportWriters.Add(reportWriter);
                 }
             }
             else
             {
-                Program.reportWriter.Report.ReportContents = new XmlReportContents();
+                IReportWriter reportWriter = new ReportWriter();
+                reportWriter.Report = new Report();
+                reportWriter.Report.ReportContents = new XmlReportContents();
+                Program.reportWriters.Add(reportWriter);
             }
 
             //Do the work using a background worker to free the UI
             backgroundWorker1.RunWorkerAsync();  
         }
 
-        private Thread reportWriterThread;
+        private List<Thread> reportWriterThreads;
 
         //This thread is called when the user starts the application.
         //It is invoked using a background worker so that the UI does not appear to freeze and the user can stop the application.
@@ -107,6 +160,7 @@ namespace XtraViewScopeFormApplication
                 xtraViewScopeConnectionManager.StartAcquisition();
                 Program.log.Info("Scope acquisition completed for the " + ScopeLibrary.Util.NumberToString.AddOrdinal(count) + " time");
 
+                System.Diagnostics.Debug.WriteLine(stopwatch.Elapsed);
                 stopwatch.Stop();
                 if (stopwatch.Elapsed < shortestRunTime)
                 {
@@ -125,14 +179,21 @@ namespace XtraViewScopeFormApplication
                 signalAnalyser.WaveformInfo = xtraViewScopeConnectionManager.WaveformInfo;
 
                 //Analyse the acquired signal
-                Program.reportWriter.Report.ReportContents.SignalAnalysisResultContainer = signalAnalyser.analyseScopeSignal();
-                Program.reportWriter.OutputDirectory = OutputDirectory;
-                Program.reportWriter.FilePathString = FileNameFormat;
+                SignalAnalysisResultContainer analysedSignal = signalAnalyser.analyseScopeSignal();
 
-                //This creates the file with the analysed data.
-                //Run in a thread so that the scope can wait for the next signal.
-                reportWriterThread = new Thread(Program.reportWriter.WriteReport);
-                reportWriterThread.Start();
+                reportWriterThreads = new List<Thread>();
+                foreach (IReportWriter reportWriter in Program.reportWriters)
+                {
+                    reportWriter.Report.ReportContents.SignalAnalysisResultContainer = analysedSignal;
+                    reportWriter.OutputDirectory = OutputDirectory;
+                    reportWriter.FilePathString = FileNameFormat;
+
+                    //This creates the file with the analysed data.
+                    //Run in a thread so that the scope can wait for the next signal.
+                    Thread reportWriterThread = new Thread(reportWriter.WriteReport);
+                    reportWriterThreads.Add(reportWriterThread);
+                    reportWriterThread.Start();
+                }
 
                 if (backgroundWorker1.CancellationPending)
                 {
@@ -160,34 +221,52 @@ namespace XtraViewScopeFormApplication
             longestLabel.Text = "Longest: " + Math.Round(heartbeatTiming.Longest.TotalSeconds, 3) + " seconds";
 
             //Wait for the report writer to finish so that the name is generated correctly
-            reportWriterThread.Join();
-            Program.log.Info("Wrote to: " + Program.reportWriter.FullFilePath);
-            progressReportLinkLabel.Text = "Wrote to: " + Program.reportWriter.FullFilePath;
-            startButton.Text = e.ProgressPercentage.ToString();
+            foreach (Thread reportWriterThread in reportWriterThreads)
+            {
+                reportWriterThread.Join();                
+            }
+
+            progressReportLinkLabel.Text = "";
             progressReportLinkLabel.Links.Clear();
-            progressReportLinkLabel.Links.Add(new LinkLabel.Link("Wrote to: ".Length, Program.reportWriter.FullFilePath.Length));
+            int currentLinkPosition = 0;
+
+            foreach (IReportWriter reportWriter in Program.reportWriters)
+            {
+                Program.log.Info("Wrote to: " + reportWriter.FullFilePath);
+                if (progressReportLinkLabel.Text.Length > 0)
+                {
+                    progressReportLinkLabel.Text += Environment.NewLine;
+                    currentLinkPosition += Environment.NewLine.Length;
+                }
+
+                progressReportLinkLabel.Text += reportWriter.FullFilePath;
+                progressReportLinkLabel.Links.Add(currentLinkPosition, reportWriter.FullFilePath.Length, reportWriter.FullFilePath);
+                currentLinkPosition += reportWriter.FullFilePath.Length;
+                
+                //progressReportLinkLabel.Links.Add(new LinkLabel.Link(currentLinkPosition, reportWriter.FullFilePath.Length));
+                //currentLinkPosition += reportWriter.FullFilePath.Length;
+            }
+
+            startButton.Text = e.ProgressPercentage.ToString();
         }
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Cancelled)
             {
-                reportWriterThread.Join();
-                Program.log.Info("Wrote to: " + Program.reportWriter.FullFilePath);
-                progressReportLinkLabel.Text = "Cancelled scope signal analysis";
-                progressReportLinkLabel.Links.Clear();
+                foreach (Thread reportWriterThread in reportWriterThreads)
+                {
+                    reportWriterThread.Join();                    
+                }
+                foreach (IReportWriter reportWriter in Program.reportWriters)
+                {
+                    Program.log.Info("Wrote to: " + reportWriter.FullFilePath);
+                }
             }
             else if (e.Error != null)
             {
                 MessageBox.Show("Error. " + (e.Error as Exception).ToString());
-                progressReportLinkLabel.Text = "Error";
-                progressReportLinkLabel.Links.Clear();
                 Program.log.Fatal((e.Error as Exception).ToString(), e.Error as Exception);
-            }
-            else
-            {
-                progressReportLinkLabel.Text = "The task has been completed. Results: " + e.Result.ToString();
-                progressReportLinkLabel.Links.Clear();
             }
 
             pictureBox1.Image = null;
@@ -200,7 +279,6 @@ namespace XtraViewScopeFormApplication
             if (backgroundWorker1.IsBusy)
             {
                 pictureBox1.Image = Properties.Resources.Stopping;
-                progressReportLinkLabel.Links.Clear();
             }
             backgroundWorker1.CancelAsync();
         }
@@ -213,6 +291,32 @@ namespace XtraViewScopeFormApplication
             {
                 configFilePath.Text = openFileDialog1.FileName;
             }
+
+            Program.configManager.ConfigFilePath = Path.GetFullPath(ConfigFilePath);
+            Program.configManager.loadConfigDocument();
+
+            //Set the file name to be <device name>_<channel_number>
+            string deviceAndChannel = "";
+            if (Program.configManager.getProperty("ResourceName") != null)
+            {
+                deviceAndChannel += Program.configManager.getProperty("ResourceName");
+            }
+            else
+            {
+                deviceAndChannel += "Dev1";
+            }
+
+            deviceAndChannel += "_";
+            if (Program.configManager.getProperty("ChannelName") != null)
+            {
+                deviceAndChannel += Program.configManager.getProperty("ChannelName");
+            }
+            else
+            {
+                deviceAndChannel += "0";
+            }
+
+            FileNameFormat = deviceAndChannel;
         }
 
         private void outputDirectory_Click(object sender, EventArgs e)
@@ -247,6 +351,10 @@ namespace XtraViewScopeFormApplication
             {
                 return fileNameFormat.Text;
             }
+            set
+            {
+                fileNameFormat.Text = value;
+            }
         }
 
         void ChangeControlState(bool isEnabled)
@@ -260,11 +368,15 @@ namespace XtraViewScopeFormApplication
 
         private void progressReportLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (Program.reportWriter.FilePathString != null)
-            {
-                Process.Start(Program.reportWriter.FullFilePath);
-                progressReportLinkLabel.LinkVisited = true;
-            }
+            LinkLabel lnk = new LinkLabel();
+            lnk = (LinkLabel)sender;
+            lnk.Links[lnk.Links.IndexOf(e.Link)].Visited = true;
+            System.Diagnostics.Process.Start(e.Link.LinkData.ToString());
+            //if (Program.reportWriters[0].FilePathString != null)
+            //{
+            //    Process.Start(Program.reportWriters[0].FullFilePath);
+            //    progressReportLinkLabel.LinkVisited = true;
+            //}
         }
     }
 

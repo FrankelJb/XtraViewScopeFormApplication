@@ -111,7 +111,6 @@ namespace XtraViewScopeFormApplication
             this.fileNameFormat.Name = "fileNameFormat";
             this.fileNameFormat.Size = new System.Drawing.Size(205, 20);
             this.fileNameFormat.TabIndex = 5;
-            this.fileNameFormat.Text = "Scope_Analysis";
             // 
             // label3
             // 
@@ -185,7 +184,7 @@ namespace XtraViewScopeFormApplication
             // averageLabel
             // 
             this.averageLabel.AutoSize = true;
-            this.averageLabel.Location = new System.Drawing.Point(12, 173);
+            this.averageLabel.Location = new System.Drawing.Point(12, 178);
             this.averageLabel.Name = "averageLabel";
             this.averageLabel.Size = new System.Drawing.Size(53, 13);
             this.averageLabel.TabIndex = 14;
@@ -194,7 +193,7 @@ namespace XtraViewScopeFormApplication
             // shortestLabel
             // 
             this.shortestLabel.AutoSize = true;
-            this.shortestLabel.Location = new System.Drawing.Point(12, 197);
+            this.shortestLabel.Location = new System.Drawing.Point(12, 202);
             this.shortestLabel.Name = "shortestLabel";
             this.shortestLabel.Size = new System.Drawing.Size(49, 13);
             this.shortestLabel.TabIndex = 15;
@@ -203,7 +202,7 @@ namespace XtraViewScopeFormApplication
             // longestLabel
             // 
             this.longestLabel.AutoSize = true;
-            this.longestLabel.Location = new System.Drawing.Point(12, 219);
+            this.longestLabel.Location = new System.Drawing.Point(12, 224);
             this.longestLabel.Name = "longestLabel";
             this.longestLabel.Size = new System.Drawing.Size(45, 13);
             this.longestLabel.TabIndex = 16;

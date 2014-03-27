@@ -121,7 +121,9 @@
     <None Include="Resources\WritingReport.gif" />
     <None Include="Resources\Busy.gif" />
     <Content Include="Resources\dataPoints.txt" />
-    <Content Include="Resources\ScopeConfiguration.xml" />
+    <Content Include="Resources\ScopeConfiguration.xml">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

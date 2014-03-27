@@ -4,6 +4,9 @@ using System;
 using System.Windows.Forms;
 using XtraViewScope.ReportWriting;
 using log4net;
+using System.Collections.Generic;
+using System.Threading;
+using ScopeLibrary.SignalAnalysis;
 
 [assembly: log4net.Config.XmlConfigurator(Watch = true)]
 
@@ -16,8 +19,9 @@ namespace XtraViewScopeFormApplication
         //private static readonly ILog log = LogManager.GetLogger(typeof (Program)) ;
 
         public static IConfigManager configManager;
-        public static IReportWriter reportWriter = new ReportWriter();
-        public static object reportWriterLock = new Object();
+        public static List<IReportWriter> reportWriters;
+        public static SignalAnalysisResultContainer analysedSignal;
+        public static Thread signalAnalyserThread;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
