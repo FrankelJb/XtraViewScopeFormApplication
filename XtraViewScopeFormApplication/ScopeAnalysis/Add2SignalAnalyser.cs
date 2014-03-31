@@ -15,7 +15,7 @@ namespace XtraViewScope.ScopeAnalysis
 {
     public class Add2SignalAnalyser : SignalAnalyser
     {
-        public override void analyseScopeSignal()
+        public override SignalAnalysisResultContainer analyseScopeSignal()
         {
             PrecisionDateTime period = StartTime + PrecisionTimeSpan.FromSeconds(WaveformInfo[0].AbsoluteInitialX);
 
@@ -210,27 +210,9 @@ namespace XtraViewScope.ScopeAnalysis
             add2SignalAnalysisResult.Heartbeat.Add2Packets = add2Packets;
             signalAnalysisResultContainer.SignalAnalysisResult = add2SignalAnalysisResult;
 
-            this.SignalAnalysisResultContainer = signalAnalysisResultContainer;
+            return signalAnalysisResultContainer;
         }
 
-        private SignalAnalysisResultContainer signalAnalysisResultContainer;
-        public SignalAnalysisResultContainer SignalAnalysisResultContainer
-        {
-            get
-            {
-                return signalAnalysisResultContainer;
-            }
-            set
-            {
-                signalAnalysisResultContainer = value;
-            }
-        }
-
-        public SignalAnalysisResultContainer getSignalAnalysisResultContainer()
-        {
-            Program.signalAnalyserThread.Join();
-            return SignalAnalysisResultContainer;
-        }
 
         //TODO: Delete this method
         void WriteFullTimeDataToFile(StringBuilder sb)

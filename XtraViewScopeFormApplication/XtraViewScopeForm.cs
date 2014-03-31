@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using XtraViewScope.ConnectionManagement;
 using XtraViewScope.ReportWriting;
@@ -74,6 +74,9 @@ namespace XtraViewScopeFormApplication
 
             FileNameFormat = deviceAndChannel;
 
+            Program.signalAnalyserBackgroundWorker.DoWork += new DoWorkEventHandler(analyseSignalBackgroundWorker_doWork);
+            Program.signalAnalyserBackgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(analyseSignalBackgroundWorker_RunWorkerCompleted);
+
         }
 
         private void startButton_Click(object sender, EventArgs e)
@@ -86,6 +89,20 @@ namespace XtraViewScopeFormApplication
             averageLabel.Text = "Average: ";
             shortestLabel.Text = "Shortest: ";
             longestLabel.Text = "Longest: ";
+
+            //Instantiate the config file using the appropriate format
+            if (configFilePath.Text.ToLower().Contains(".properties"))
+            {
+                Program.configManager = new PropertyConfigManager();
+            }
+            else
+            {
+                Program.configManager = new XmlConfigManager();
+            }
+
+            //Load the config file and set the default save file format
+            Program.configManager.ConfigFilePath = Path.GetFullPath(ConfigFilePath);
+            Program.configManager.loadConfigDocument();
 
             ChangeControlState(false);
 
@@ -134,8 +151,6 @@ namespace XtraViewScopeFormApplication
             backgroundWorker1.RunWorkerAsync();  
         }
 
-        private List<Thread> reportWriterThreads;
-
         //This thread is called when the user starts the application.
         //It is invoked using a background worker so that the UI does not appear to freeze and the user can stop the application.
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
@@ -150,7 +165,7 @@ namespace XtraViewScopeFormApplication
 
             //The first time the hearbeat is sensed can be 0.0 < currentTime < 30.0 seconds. 
             //This data disrupts the timing captured below, so make sure that it isn't included by ignoring the first heartbeat
-            xtraViewScopeConnectionManager.StartAcquisition();
+            //xtraViewScopeConnectionManager.StartAcquisition();
 
             int count = 1;
             while (true)
@@ -158,10 +173,10 @@ namespace XtraViewScopeFormApplication
                 //Acquire the scope signal
                 stopwatch.Restart();
                 xtraViewScopeConnectionManager.StartAcquisition();
-                Program.log.Info("Scope acquisition completed for the " + ScopeLibrary.Util.NumberToString.AddOrdinal(count) + " time");
-
-                System.Diagnostics.Debug.WriteLine(stopwatch.Elapsed);
                 stopwatch.Stop();
+
+                Program.log.Info("Scope acquisition completed for the " + ScopeLibrary.Util.NumberToString.AddOrdinal(count) + " time");
+                
                 if (stopwatch.Elapsed < shortestRunTime)
                 {
                     shortestRunTime = stopwatch.Elapsed;
@@ -179,21 +194,7 @@ namespace XtraViewScopeFormApplication
                 signalAnalyser.WaveformInfo = xtraViewScopeConnectionManager.WaveformInfo;
 
                 //Analyse the acquired signal
-                SignalAnalysisResultContainer analysedSignal = signalAnalyser.analyseScopeSignal();
-
-                reportWriterThreads = new List<Thread>();
-                foreach (IReportWriter reportWriter in Program.reportWriters)
-                {
-                    reportWriter.Report.ReportContents.SignalAnalysisResultContainer = analysedSignal;
-                    reportWriter.OutputDirectory = OutputDirectory;
-                    reportWriter.FilePathString = FileNameFormat;
-
-                    //This creates the file with the analysed data.
-                    //Run in a thread so that the scope can wait for the next signal.
-                    Thread reportWriterThread = new Thread(reportWriter.WriteReport);
-                    reportWriterThreads.Add(reportWriterThread);
-                    reportWriterThread.Start();
-                }
+                Program.signalAnalyserBackgroundWorker.RunWorkerAsync(signalAnalyser);
 
                 if (backgroundWorker1.CancellationPending)
                 {
@@ -203,65 +204,82 @@ namespace XtraViewScopeFormApplication
                 }
                 //Generate the link on the interface in another thread that waits for the report to be created first.
                 int passCount = count;
-                Thread reportProgressThread = new Thread(() => backgroundWorker1.ReportProgress(passCount, new HeartbeatTiming(totalRunTime.TotalSeconds / passCount, shortestRunTime, longestRunTime)));
-                reportProgressThread.Start();
+                Task.Factory.StartNew(() => backgroundWorker1.ReportProgress(passCount, new HeartbeatTiming(totalRunTime.TotalSeconds / passCount, shortestRunTime, longestRunTime)));
                 count++;
             }
         }
 
-
-        private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void analyseSignalBackgroundWorker_doWork(object sender, DoWorkEventArgs e)
         {
-            HeartbeatTiming heartbeatTiming = (HeartbeatTiming) e.UserState;
-            Program.log.Info("Average: " + Math.Round(heartbeatTiming.Average, 3) + " seconds");
-            averageLabel.Text = "Average: " + Math.Round(heartbeatTiming.Average, 3) + " seconds";
-            Program.log.Info("Shortest: " + Math.Round(heartbeatTiming.Shortest.TotalSeconds, 3) + " seconds");
-            shortestLabel.Text =  "Shortest: " + Math.Round(heartbeatTiming.Shortest.TotalSeconds, 3) + " seconds";
-            Program.log.Info("Longest: " + Math.Round(heartbeatTiming.Longest.TotalSeconds, 3) + " seconds");
-            longestLabel.Text = "Longest: " + Math.Round(heartbeatTiming.Longest.TotalSeconds, 3) + " seconds";
+            SignalAnalyser signalAnalyser = (SignalAnalyser)e.Argument;
+            e.Result = signalAnalyser.analyseScopeSignal();
+        }
 
-            //Wait for the report writer to finish so that the name is generated correctly
-            foreach (Thread reportWriterThread in reportWriterThreads)
-            {
-                reportWriterThread.Join();                
-            }
+        List<Task> reportWriterTasks = new List<Task>();
 
-            progressReportLinkLabel.Text = "";
-            progressReportLinkLabel.Links.Clear();
-            int currentLinkPosition = 0;
+        private void analyseSignalBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            SignalAnalysisResultContainer signalAnalysisResultContainer = (SignalAnalysisResultContainer)e.Result;
 
             foreach (IReportWriter reportWriter in Program.reportWriters)
             {
-                Program.log.Info("Wrote to: " + reportWriter.FullFilePath);
-                if (progressReportLinkLabel.Text.Length > 0)
-                {
-                    progressReportLinkLabel.Text += Environment.NewLine;
-                    currentLinkPosition += Environment.NewLine.Length;
-                }
+                reportWriter.OutputDirectory = OutputDirectory;
+                reportWriter.FilePathString = FileNameFormat;
 
-                progressReportLinkLabel.Text += reportWriter.FullFilePath;
-                progressReportLinkLabel.Links.Add(currentLinkPosition, reportWriter.FullFilePath.Length, reportWriter.FullFilePath);
-                currentLinkPosition += reportWriter.FullFilePath.Length;
-                
-                //progressReportLinkLabel.Links.Add(new LinkLabel.Link(currentLinkPosition, reportWriter.FullFilePath.Length));
-                //currentLinkPosition += reportWriter.FullFilePath.Length;
+                reportWriter.Report.ReportContents.SignalAnalysisResultContainer = signalAnalysisResultContainer;
+
+                reportWriterTasks.Add(Task.Factory.StartNew(reportWriter.WriteReport));
             }
 
-            startButton.Text = e.ProgressPercentage.ToString();
+            if (backgroundWorker1.IsBusy)
+            {
+                Task.Factory.StartNew(() => backgroundWorker1.ReportProgress(-1));
+            }
+        }
+    
+        private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            if (e.ProgressPercentage > 0)
+            {
+                HeartbeatTiming heartbeatTiming = (HeartbeatTiming)e.UserState;
+                Program.log.Info("Average: " + Math.Round(heartbeatTiming.Average, 3) + " seconds");
+                averageLabel.Text = "Average: " + Math.Round(heartbeatTiming.Average, 3) + " seconds";
+                Program.log.Info("Shortest: " + Math.Round(heartbeatTiming.Shortest.TotalSeconds, 3) + " seconds");
+                shortestLabel.Text = "Shortest: " + Math.Round(heartbeatTiming.Shortest.TotalSeconds, 3) + " seconds";
+                Program.log.Info("Longest: " + Math.Round(heartbeatTiming.Longest.TotalSeconds, 3) + " seconds");
+                longestLabel.Text = "Longest: " + Math.Round(heartbeatTiming.Longest.TotalSeconds, 3) + " seconds";
+
+                startButton.Text = e.ProgressPercentage.ToString();
+            }
+            else
+            {
+                Task.WaitAll(reportWriterTasks.ToArray());
+
+                progressReportLinkLabel.Text = "";
+                progressReportLinkLabel.Links.Clear();
+                int currentLinkPosition = 0;
+
+                foreach (IReportWriter reportWriter in Program.reportWriters)
+                {
+                    Program.log.Info("Wrote to: " + reportWriter.FullFilePath);
+                    if (progressReportLinkLabel.Text.Length > 0)
+                    {
+                        progressReportLinkLabel.Text += Environment.NewLine;
+                        currentLinkPosition += Environment.NewLine.Length;
+                    }
+
+                    progressReportLinkLabel.Text += reportWriter.FullFilePath;
+                    progressReportLinkLabel.Links.Add(currentLinkPosition, reportWriter.FullFilePath.Length, reportWriter.FullFilePath);
+                    currentLinkPosition += reportWriter.FullFilePath.Length;
+                }
+            }
+
         }
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Cancelled)
             {
-                foreach (Thread reportWriterThread in reportWriterThreads)
-                {
-                    reportWriterThread.Join();                    
-                }
-                foreach (IReportWriter reportWriter in Program.reportWriters)
-                {
-                    Program.log.Info("Wrote to: " + reportWriter.FullFilePath);
-                }
             }
             else if (e.Error != null)
             {
@@ -372,11 +390,6 @@ namespace XtraViewScopeFormApplication
             lnk = (LinkLabel)sender;
             lnk.Links[lnk.Links.IndexOf(e.Link)].Visited = true;
             System.Diagnostics.Process.Start(e.Link.LinkData.ToString());
-            //if (Program.reportWriters[0].FilePathString != null)
-            //{
-            //    Process.Start(Program.reportWriters[0].FullFilePath);
-            //    progressReportLinkLabel.LinkVisited = true;
-            //}
         }
     }
 

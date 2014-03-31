@@ -4,7 +4,7 @@
   <Coupling>DC</Coupling>
   <IdQuery>false</IdQuery>
   <NumberOfMeasurentSamplesToFetch>400</NumberOfMeasurentSamplesToFetch>
-  <NumberOfPointsMin>70000</NumberOfPointsMin>
+  <NumberOfPointsMin>700000</NumberOfPointsMin>
   <NumberOfRecords>1</NumberOfRecords>
   <Offset>0.0</Offset>
   <ProbeAttenuation>1.0</ProbeAttenuation>
@@ -12,7 +12,7 @@
   <ReportContents>XmlAndJson</ReportContents>
   <ResetDevice>false</ResetDevice>
   <ResourceName>Dev1</ResourceName>
-  <SampleRateMin>200000</SampleRateMin>
+  <SampleRateMin>2000000</SampleRateMin>
   <ScopeTriggerType>Edge</ScopeTriggerType>
   <Timeout>-1</Timeout>
   <VerticalRange>4.0</VerticalRange>
