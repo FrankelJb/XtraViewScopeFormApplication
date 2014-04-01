@@ -12,6 +12,8 @@ using System.Windows.Forms;
 using XtraViewScope.ConnectionManagement;
 using XtraViewScope.ReportWriting;
 using XtraViewScope.ScopeAnalysis;
+using XtraViewScopeFormApplication.ReportWriting;
+using XtraViewScopeFormApplication.ScopeAnalysis;
 
 namespace XtraViewScopeFormApplication
 {
@@ -151,6 +153,7 @@ namespace XtraViewScopeFormApplication
             backgroundWorker1.RunWorkerAsync();  
         }
 
+        IScopeConnectionManager xtraViewScopeConnectionManager;
         //This thread is called when the user starts the application.
         //It is invoked using a background worker so that the UI does not appear to freeze and the user can stop the application.
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
@@ -160,8 +163,16 @@ namespace XtraViewScopeFormApplication
             TimeSpan shortestRunTime = TimeSpan.MaxValue;
             TimeSpan longestRunTime = TimeSpan.MinValue;
             Stopwatch stopwatch = new Stopwatch();
+            
+            ScopeConnectionManagerConsumer scopeConnectionManagerConsumer = new ScopeConnectionManagerConsumer();
+            Program.runConnectionManagerConsumer = true;
+            Task.Factory.StartNew(scopeConnectionManagerConsumer.consumeConnectionManager);
 
-            IScopeConnectionManager xtraViewScopeConnectionManager = new XtraViewScopeConnectionManager();
+            SignalAnalysisResultConsumer reportWriterConsumer = new SignalAnalysisResultConsumer();
+            reportWriterConsumer.OutputDirectory = OutputDirectory;
+            reportWriterConsumer.FileNameFormat = FileNameFormat;
+            Program.runSignalAnalysisResultConsumer = true;
+            Task.Factory.StartNew(reportWriterConsumer.consumeSignalAnalysisResults);
 
             //The first time the hearbeat is sensed can be 0.0 < currentTime < 30.0 seconds. 
             //This data disrupts the timing captured below, so make sure that it isn't included by ignoring the first heartbeat
@@ -170,10 +181,13 @@ namespace XtraViewScopeFormApplication
             int count = 1;
             while (true)
             {
+                xtraViewScopeConnectionManager = new XtraViewScopeConnectionManager();
+
                 //Acquire the scope signal
                 stopwatch.Restart();
                 xtraViewScopeConnectionManager.StartAcquisition();
                 stopwatch.Stop();
+                Program.scopeConnectionBlockingQueue.Add(xtraViewScopeConnectionManager);
 
                 Program.log.Info("Scope acquisition completed for the " + ScopeLibrary.Util.NumberToString.AddOrdinal(count) + " time");
                 
@@ -194,12 +208,14 @@ namespace XtraViewScopeFormApplication
                 signalAnalyser.WaveformInfo = xtraViewScopeConnectionManager.WaveformInfo;
 
                 //Analyse the acquired signal
-                Program.signalAnalyserBackgroundWorker.RunWorkerAsync(signalAnalyser);
+                //Program.signalAnalyserBackgroundWorker.RunWorkerAsync(signalAnalyser);
 
                 if (backgroundWorker1.CancellationPending)
                 {
                     e.Cancel = true;
                     Program.log.Info("Acquisition cancelled by user, stopping");
+                    Program.runConnectionManagerConsumer = false;
+                    Program.runSignalAnalysisResultConsumer = false;
                     return;
                 }
                 //Generate the link on the interface in another thread that waits for the report to be created first.
@@ -212,7 +228,7 @@ namespace XtraViewScopeFormApplication
         private void analyseSignalBackgroundWorker_doWork(object sender, DoWorkEventArgs e)
         {
             SignalAnalyser signalAnalyser = (SignalAnalyser)e.Argument;
-            e.Result = signalAnalyser.analyseScopeSignal();
+            //e.Result = signalAnalyser.analyseScopeSignal();
         }
 
         List<Task> reportWriterTasks = new List<Task>();
@@ -299,6 +315,7 @@ namespace XtraViewScopeFormApplication
                 pictureBox1.Image = Properties.Resources.Stopping;
             }
             backgroundWorker1.CancelAsync();
+            xtraViewScopeConnectionManager.CloseSession();
         }
 
         private void configFilePath_Click(object sender, EventArgs e)

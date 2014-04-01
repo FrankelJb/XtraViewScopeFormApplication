@@ -56,21 +56,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BlockingCollection.cs" />
     <Compile Include="ConnectionManagement\XtraViewScopeConnectionManager.cs" />
+    <Compile Include="Models\Enums\XmpPacketLayerType.cs" />
+    <Compile Include="Models\IrInbound.cs" />
+    <Compile Include="Models\XmpPackets\XmpPacketLayer.cs" />
+    <Compile Include="ScopeAnalysis\SignalAnalysisResultConsumer.cs" />
+    <Compile Include="ScopeAnalysis\ScopeConnectionManagerConsumer.cs" />
     <Compile Include="XtraViewScopeForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="XtraViewScopeForm.Designer.cs">
       <DependentUpon>XtraViewScopeForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Models\Add2Packet.cs" />
+    <Compile Include="Models\XmpPackets\Add2Packet.cs" />
     <Compile Include="Models\Dictionaries\Add2Dictionary.cs" />
     <Compile Include="Models\Enums\BinaryData.cs" />
-    <Compile Include="Models\Enums\HeartbeatStatus.cs" />
+    <Compile Include="Models\Enums\XmpPacketTransmissionStatus.cs" />
     <Compile Include="Models\Enums\MessageType.cs" />
     <Compile Include="Models\Exceptions\MalformedXmpPacketException.cs" />
     <Compile Include="Models\Exceptions\ScopeNotInitialisedException.cs" />
-    <Compile Include="Models\Heartbeat.cs" />
+    <Compile Include="Models\XmpPackets\Heartbeat.cs" />
     <Compile Include="Models\Nibble.cs" />
     <Compile Include="Models\NibbleJsonConverter.cs" />
     <Compile Include="Program.cs" />

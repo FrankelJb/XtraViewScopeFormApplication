@@ -6,35 +6,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using XtraViewScope.Models;
+using XtraViewScopeFormApplication.Models.XmpPackets;
+using XtraViewScopeFormApplication.ScopeAnalysis;
 
 namespace XtraViewScope.ScopeAnalysis
 {
     public class Add2SignalAnalysisResult : ISignalAnalysisResult
     {
-        private Heartbeat heartbeat;
-        public Heartbeat Heartbeat
+
+        private XmpPacketTransmission xmpPacketTransmission;
+        public XmpPacketTransmission XmpPacketTransmission
         {
             get
             {
-                return heartbeat;
+                return xmpPacketTransmission;
             }
             set
             {
-                heartbeat = value;
+                xmpPacketTransmission = value;
             }
         }
-
-        //private Collection<Add2Packet> add2Packets;
-        //public Collection<Add2Packet> Add2Packets
-        //{
-        //    get
-        //    {
-        //        return add2Packets;
-        //    }
-        //    set
-        //    {
-        //        add2Packets = value;
-        //    }
-        //}
     }
 }

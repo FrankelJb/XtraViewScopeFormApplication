@@ -211,7 +211,16 @@ namespace XtraViewScope.ConnectionManagement
             scopeSession.Acquisition.NumberOfMeasurementSamplesToFetch = NumberOfMeasurementSamplesToFetch;
 
             StartTime = PrecisionDateTime.Now;
-            waveforms = scopeSession.Channels[ScopeTriggerSource.Channel0].Measurement.FetchDouble(Timeout, actualRecordLength, waveforms, out waveformInfo);
+            if (ChannelName.Equals("0"))
+            {
+                waveforms = scopeSession.Channels[ScopeTriggerSource.Channel0].Measurement.FetchDouble(Timeout, actualRecordLength, waveforms, out waveformInfo);
+            }
+            else if (ChannelName.Equals("1"))
+            {
+                waveforms = scopeSession.Channels[ScopeTriggerSource.Channel1].Measurement.FetchDouble(Timeout, actualRecordLength, waveforms, out waveformInfo);
+            }
+
+
         }
 
         public void CloseSession()

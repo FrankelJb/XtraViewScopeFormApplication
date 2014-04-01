@@ -458,7 +458,7 @@ namespace XtraViewScopeTest
 
             SignalAnalysisResultContainer signalAnalysisResultContainer = new SignalAnalysisResultContainer();
             Add2SignalAnalysisResult add2SignalAnalysisResult = new Add2SignalAnalysisResult();
-            add2SignalAnalysisResult.Heartbeat = new Heartbeat();
+            //add2SignalAnalysisResult.Heartbeat = new Heartbeat();
 
             Collection<Add2Packet> add2Packets = new Collection<Add2Packet>();
             Add2Packet currentAdd2Packet = null;

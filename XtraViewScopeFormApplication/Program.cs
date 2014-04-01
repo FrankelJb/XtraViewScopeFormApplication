@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Threading;
 using ScopeLibrary.SignalAnalysis;
 using System.ComponentModel;
+using System.Collections.Concurrent;
+using ScopeLibrary.ConnectionManagement;
 
 [assembly: log4net.Config.XmlConfigurator(Watch = true)]
 
@@ -23,6 +25,12 @@ namespace XtraViewScopeFormApplication
         public static IConfigManager configManager;
         public static List<IReportWriter> reportWriters;
         public static BackgroundWorker signalAnalyserBackgroundWorker = new BackgroundWorker();
+
+        public static BlockingCollection<IScopeConnectionManager> scopeConnectionBlockingQueue = new BlockingCollection<IScopeConnectionManager>();
+        public static bool runConnectionManagerConsumer = true;
+
+        public static BlockingCollection<SignalAnalysisResultContainer> signalAnalysisResultBlockingQueue = new BlockingCollection<SignalAnalysisResultContainer>();
+        public static bool runSignalAnalysisResultConsumer = true;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
