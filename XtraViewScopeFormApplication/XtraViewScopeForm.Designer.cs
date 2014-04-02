@@ -41,14 +41,14 @@ namespace XtraViewScopeFormApplication
             this.label3 = new System.Windows.Forms.Label();
             this.fileNameFormatSuffix = new System.Windows.Forms.Label();
             this.stopButton = new System.Windows.Forms.Button();
-            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.progressReportLinkLabel = new System.Windows.Forms.LinkLabel();
+            this.uiBackgroundWorker = new System.ComponentModel.BackgroundWorker();
             this.fileFormatInformationLabel = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.counterLabel = new System.Windows.Forms.Label();
             this.averageLabel = new System.Windows.Forms.Label();
             this.shortestLabel = new System.Windows.Forms.Label();
             this.longestLabel = new System.Windows.Forms.Label();
+            this.irKeyPresses = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -139,22 +139,13 @@ namespace XtraViewScopeFormApplication
             this.stopButton.UseVisualStyleBackColor = true;
             this.stopButton.Click += new System.EventHandler(this.stopButton_Click);
             // 
-            // backgroundWorker1
+            // uiBackgroundWorker
             // 
-            this.backgroundWorker1.WorkerReportsProgress = true;
-            this.backgroundWorker1.WorkerSupportsCancellation = true;
-            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
-            this.backgroundWorker1.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker1_ProgressChanged);
-            this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
-            // 
-            // progressReportLinkLabel
-            // 
-            this.progressReportLinkLabel.AutoSize = true;
-            this.progressReportLinkLabel.Location = new System.Drawing.Point(12, 146);
-            this.progressReportLinkLabel.Name = "progressReportLinkLabel";
-            this.progressReportLinkLabel.Size = new System.Drawing.Size(0, 13);
-            this.progressReportLinkLabel.TabIndex = 10;
-            this.progressReportLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.progressReportLinkLabel_LinkClicked);
+            this.uiBackgroundWorker.WorkerReportsProgress = true;
+            this.uiBackgroundWorker.WorkerSupportsCancellation = true;
+            this.uiBackgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+            this.uiBackgroundWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.uiBackgroundWorker_ProgressChanged);
+            this.uiBackgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.uiBackgroundWorker_RunWorkerCompleted);
             // 
             // fileFormatInformationLabel
             // 
@@ -208,18 +199,28 @@ namespace XtraViewScopeFormApplication
             this.longestLabel.TabIndex = 16;
             this.longestLabel.Text = "Longest";
             // 
+            // irKeyPresses
+            // 
+            this.irKeyPresses.Location = new System.Drawing.Point(12, 250);
+            this.irKeyPresses.Multiline = true;
+            this.irKeyPresses.Name = "irKeyPresses";
+            this.irKeyPresses.ReadOnly = true;
+            this.irKeyPresses.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.irKeyPresses.Size = new System.Drawing.Size(311, 278);
+            this.irKeyPresses.TabIndex = 17;
+            // 
             // XtraViewScopeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(674, 242);
+            this.ClientSize = new System.Drawing.Size(674, 546);
+            this.Controls.Add(this.irKeyPresses);
             this.Controls.Add(this.longestLabel);
             this.Controls.Add(this.shortestLabel);
             this.Controls.Add(this.averageLabel);
             this.Controls.Add(this.counterLabel);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.fileFormatInformationLabel);
-            this.Controls.Add(this.progressReportLinkLabel);
             this.Controls.Add(this.stopButton);
             this.Controls.Add(this.fileNameFormatSuffix);
             this.Controls.Add(this.label3);
@@ -250,14 +251,14 @@ namespace XtraViewScopeFormApplication
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label fileNameFormatSuffix;
         private System.Windows.Forms.Button stopButton;
-        private System.ComponentModel.BackgroundWorker backgroundWorker1;
-        private System.Windows.Forms.LinkLabel progressReportLinkLabel;
         private System.Windows.Forms.Label fileFormatInformationLabel;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Label counterLabel;
         private System.Windows.Forms.Label averageLabel;
         private System.Windows.Forms.Label shortestLabel;
         private System.Windows.Forms.Label longestLabel;
+        public System.ComponentModel.BackgroundWorker uiBackgroundWorker;
+        private System.Windows.Forms.TextBox irKeyPresses;
     }
 }
 

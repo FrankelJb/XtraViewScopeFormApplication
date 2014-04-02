@@ -56,7 +56,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BlockingCollection.cs" />
     <Compile Include="ConnectionManagement\XtraViewScopeConnectionManager.cs" />
     <Compile Include="Models\Enums\XmpPacketLayerType.cs" />
     <Compile Include="Models\IrInbound.cs" />
@@ -123,6 +122,7 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <None Include="Resources\irKeyMapping.properties" />
     <None Include="Resources\Stopping.gif" />
     <None Include="Resources\WritingReport.gif" />
     <None Include="Resources\Busy.gif" />

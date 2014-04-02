@@ -219,8 +219,6 @@ namespace XtraViewScope.ConnectionManagement
             {
                 waveforms = scopeSession.Channels[ScopeTriggerSource.Channel1].Measurement.FetchDouble(Timeout, actualRecordLength, waveforms, out waveformInfo);
             }
-
-
         }
 
         public void CloseSession()

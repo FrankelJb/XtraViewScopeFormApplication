@@ -49,6 +49,10 @@ namespace XtraViewScopeFormApplication
                 Program.configManager = new XmlConfigManager();
             }
 
+            Program.keyPressConfigManager = new PropertyConfigManager();
+            Program.keyPressConfigManager.ConfigFilePath = @"C:\Projects\XtraViewScopeFormApplication\XtraViewScopeFormApplication\Resources\irKeyMapping.properties";
+            Program.keyPressConfigManager.loadConfigDocument();
+
             //Load the config file and set the default save file format
             Program.configManager.ConfigFilePath = Path.GetFullPath(ConfigFilePath);
             Program.configManager.loadConfigDocument();
@@ -76,17 +80,12 @@ namespace XtraViewScopeFormApplication
 
             FileNameFormat = deviceAndChannel;
 
-            Program.signalAnalyserBackgroundWorker.DoWork += new DoWorkEventHandler(analyseSignalBackgroundWorker_doWork);
-            Program.signalAnalyserBackgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(analyseSignalBackgroundWorker_RunWorkerCompleted);
-
         }
 
         private void startButton_Click(object sender, EventArgs e)
         {
             startButton.Text = "0";
             pictureBox1.Image = Properties.Resources.Busy;
-            progressReportLinkLabel.Text = "";
-            progressReportLinkLabel.Links.Clear();
 
             averageLabel.Text = "Average: ";
             shortestLabel.Text = "Shortest: ";
@@ -111,31 +110,20 @@ namespace XtraViewScopeFormApplication
             //We need new reportWriters each time the acquisition is started based on the configs
             Program.reportWriters = new List<IReportWriter>();
 
+
             //Set the report content type
             if (Program.configManager.getProperty("ReportContents") != null)
             {
-                if (Program.configManager.getProperty("ReportContents").Equals("Xml"))
+                if (Program.configManager.getProperty("ReportContents").Contains("Xml"))
                 {
                     IReportWriter reportWriter = new ReportWriter();
                     reportWriter.Report = new Report();
                     reportWriter.Report.ReportContents = new XmlReportContents();
                     Program.reportWriters.Add(reportWriter);
                 }
-                else if (Program.configManager.getProperty("ReportContents").Equals("Json"))
+                if (Program.configManager.getProperty("ReportContents").Contains("Json"))
                 {
                     IReportWriter reportWriter = new ReportWriter();
-                    reportWriter.Report = new Report();
-                    reportWriter.Report.ReportContents = new JsonReportContents();
-                    Program.reportWriters.Add(reportWriter);
-                }
-                else if (Program.configManager.getProperty("ReportContents").Equals("XmlAndJson"))
-                {
-                    IReportWriter reportWriter = new ReportWriter();
-                    reportWriter.Report = new Report();
-                    reportWriter.Report.ReportContents = new XmlReportContents();
-                    Program.reportWriters.Add(reportWriter);
-                    
-                    reportWriter = new ReportWriter();
                     reportWriter.Report = new Report();
                     reportWriter.Report.ReportContents = new JsonReportContents();
                     Program.reportWriters.Add(reportWriter);
@@ -150,7 +138,7 @@ namespace XtraViewScopeFormApplication
             }
 
             //Do the work using a background worker to free the UI
-            backgroundWorker1.RunWorkerAsync();  
+            uiBackgroundWorker.RunWorkerAsync();  
         }
 
         IScopeConnectionManager xtraViewScopeConnectionManager;
@@ -159,24 +147,16 @@ namespace XtraViewScopeFormApplication
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
             SignalAnalyser signalAnalyser = new Add2SignalAnalyser();
-            TimeSpan totalRunTime = new TimeSpan();
-            TimeSpan shortestRunTime = TimeSpan.MaxValue;
-            TimeSpan longestRunTime = TimeSpan.MinValue;
-            Stopwatch stopwatch = new Stopwatch();
             
             ScopeConnectionManagerConsumer scopeConnectionManagerConsumer = new ScopeConnectionManagerConsumer();
             Program.runConnectionManagerConsumer = true;
             Task.Factory.StartNew(scopeConnectionManagerConsumer.consumeConnectionManager);
 
-            SignalAnalysisResultConsumer reportWriterConsumer = new SignalAnalysisResultConsumer();
-            reportWriterConsumer.OutputDirectory = OutputDirectory;
-            reportWriterConsumer.FileNameFormat = FileNameFormat;
+            SignalAnalysisResultConsumer signalAnalysisResultConsumer = new SignalAnalysisResultConsumer(this);
+            signalAnalysisResultConsumer.OutputDirectory = OutputDirectory;
+            signalAnalysisResultConsumer.FileNameFormat = FileNameFormat;
             Program.runSignalAnalysisResultConsumer = true;
-            Task.Factory.StartNew(reportWriterConsumer.consumeSignalAnalysisResults);
-
-            //The first time the hearbeat is sensed can be 0.0 < currentTime < 30.0 seconds. 
-            //This data disrupts the timing captured below, so make sure that it isn't included by ignoring the first heartbeat
-            //xtraViewScopeConnectionManager.StartAcquisition();
+            Task.Factory.StartNew(signalAnalysisResultConsumer.consumeSignalAnalysisResults);
 
             int count = 1;
             while (true)
@@ -184,24 +164,10 @@ namespace XtraViewScopeFormApplication
                 xtraViewScopeConnectionManager = new XtraViewScopeConnectionManager();
 
                 //Acquire the scope signal
-                stopwatch.Restart();
                 xtraViewScopeConnectionManager.StartAcquisition();
-                stopwatch.Stop();
-                Program.scopeConnectionBlockingQueue.Add(xtraViewScopeConnectionManager);
+                Program.scopeConnectionBlockingCollection.Add(xtraViewScopeConnectionManager);
 
                 Program.log.Info("Scope acquisition completed for the " + ScopeLibrary.Util.NumberToString.AddOrdinal(count) + " time");
-                
-                if (stopwatch.Elapsed < shortestRunTime)
-                {
-                    shortestRunTime = stopwatch.Elapsed;
-                } 
-
-                if (stopwatch.Elapsed > longestRunTime)
-                {
-                    longestRunTime = stopwatch.Elapsed;
-                }
-
-                totalRunTime += stopwatch.Elapsed;
 
                 signalAnalyser.StartTime = xtraViewScopeConnectionManager.StartTime;
                 signalAnalyser.Waveforms = xtraViewScopeConnectionManager.Waveforms;
@@ -210,7 +176,7 @@ namespace XtraViewScopeFormApplication
                 //Analyse the acquired signal
                 //Program.signalAnalyserBackgroundWorker.RunWorkerAsync(signalAnalyser);
 
-                if (backgroundWorker1.CancellationPending)
+                if (uiBackgroundWorker.CancellationPending)
                 {
                     e.Cancel = true;
                     Program.log.Info("Acquisition cancelled by user, stopping");
@@ -220,79 +186,42 @@ namespace XtraViewScopeFormApplication
                 }
                 //Generate the link on the interface in another thread that waits for the report to be created first.
                 int passCount = count;
-                Task.Factory.StartNew(() => backgroundWorker1.ReportProgress(passCount, new HeartbeatTiming(totalRunTime.TotalSeconds / passCount, shortestRunTime, longestRunTime)));
+                Task.Factory.StartNew(() => uiBackgroundWorker.ReportProgress(passCount));
                 count++;
             }
         }
 
-        private void analyseSignalBackgroundWorker_doWork(object sender, DoWorkEventArgs e)
-        {
-            SignalAnalyser signalAnalyser = (SignalAnalyser)e.Argument;
-            //e.Result = signalAnalyser.analyseScopeSignal();
-        }
-
-        List<Task> reportWriterTasks = new List<Task>();
-
-        private void analyseSignalBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            SignalAnalysisResultContainer signalAnalysisResultContainer = (SignalAnalysisResultContainer)e.Result;
-
-            foreach (IReportWriter reportWriter in Program.reportWriters)
-            {
-                reportWriter.OutputDirectory = OutputDirectory;
-                reportWriter.FilePathString = FileNameFormat;
-
-                reportWriter.Report.ReportContents.SignalAnalysisResultContainer = signalAnalysisResultContainer;
-
-                reportWriterTasks.Add(Task.Factory.StartNew(reportWriter.WriteReport));
-            }
-
-            if (backgroundWorker1.IsBusy)
-            {
-                Task.Factory.StartNew(() => backgroundWorker1.ReportProgress(-1));
-            }
-        }
-    
-        private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void uiBackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             if (e.ProgressPercentage > 0)
             {
-                HeartbeatTiming heartbeatTiming = (HeartbeatTiming)e.UserState;
-                Program.log.Info("Average: " + Math.Round(heartbeatTiming.Average, 3) + " seconds");
-                averageLabel.Text = "Average: " + Math.Round(heartbeatTiming.Average, 3) + " seconds";
-                Program.log.Info("Shortest: " + Math.Round(heartbeatTiming.Shortest.TotalSeconds, 3) + " seconds");
-                shortestLabel.Text = "Shortest: " + Math.Round(heartbeatTiming.Shortest.TotalSeconds, 3) + " seconds";
-                Program.log.Info("Longest: " + Math.Round(heartbeatTiming.Longest.TotalSeconds, 3) + " seconds");
-                longestLabel.Text = "Longest: " + Math.Round(heartbeatTiming.Longest.TotalSeconds, 3) + " seconds";
-
                 startButton.Text = e.ProgressPercentage.ToString();
             }
-            else
+            else if (e.ProgressPercentage == -1)
             {
-                Task.WaitAll(reportWriterTasks.ToArray());
-
-                progressReportLinkLabel.Text = "";
-                progressReportLinkLabel.Links.Clear();
-                int currentLinkPosition = 0;
-
-                foreach (IReportWriter reportWriter in Program.reportWriters)
+                HeartbeatTiming hearbeatTiming = (HeartbeatTiming)e.UserState;
+                averageLabel.Text = "Average: " + Math.Round(hearbeatTiming.Average, 3);
+                shortestLabel.Text = "Shortest: " + Math.Round(hearbeatTiming.Shortest.Value.TotalSeconds, 3);
+                longestLabel.Text = "Longest: " + Math.Round(hearbeatTiming.Longest.Value.TotalSeconds, 3);
+            }
+            else if (e.ProgressPercentage == -2)
+            {
+                string keyPress = (string)e.UserState;
+                if(irKeyPresses.Text.Length > 0){
+                    irKeyPresses.AppendText(Environment.NewLine);
+                }
+                if (Program.keyPressConfigManager.getProperty(keyPress) != null)
                 {
-                    Program.log.Info("Wrote to: " + reportWriter.FullFilePath);
-                    if (progressReportLinkLabel.Text.Length > 0)
-                    {
-                        progressReportLinkLabel.Text += Environment.NewLine;
-                        currentLinkPosition += Environment.NewLine.Length;
-                    }
-
-                    progressReportLinkLabel.Text += reportWriter.FullFilePath;
-                    progressReportLinkLabel.Links.Add(currentLinkPosition, reportWriter.FullFilePath.Length, reportWriter.FullFilePath);
-                    currentLinkPosition += reportWriter.FullFilePath.Length;
+                    irKeyPresses.AppendText(Program.keyPressConfigManager.getProperty(keyPress));
+                }
+                else
+                {
+                    irKeyPresses.AppendText(keyPress);//TODO: Change this to "unknown"
                 }
             }
-
         }
 
-        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void uiBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Cancelled)
             {
@@ -310,11 +239,11 @@ namespace XtraViewScopeFormApplication
 
         private void stopButton_Click(object sender, EventArgs e)
         {
-            if (backgroundWorker1.IsBusy)
+            if (uiBackgroundWorker.IsBusy)
             {
                 pictureBox1.Image = Properties.Resources.Stopping;
             }
-            backgroundWorker1.CancelAsync();
+            uiBackgroundWorker.CancelAsync();
             xtraViewScopeConnectionManager.CloseSession();
         }
 
@@ -399,27 +328,6 @@ namespace XtraViewScopeFormApplication
             fileNameFormat.Enabled = isEnabled;
             startButton.Enabled = isEnabled;
             this.Refresh();
-        }
-
-        private void progressReportLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            LinkLabel lnk = new LinkLabel();
-            lnk = (LinkLabel)sender;
-            lnk.Links[lnk.Links.IndexOf(e.Link)].Visited = true;
-            System.Diagnostics.Process.Start(e.Link.LinkData.ToString());
-        }
-    }
-
-    public class HeartbeatTiming
-    {
-        public double Average { get; set; }
-        public TimeSpan Shortest { get; set; }
-        public TimeSpan Longest { get; set; }
-        public HeartbeatTiming(double average, TimeSpan shortest, TimeSpan longest)
-        {
-            Average = average;
-            Shortest = shortest;
-            Longest = longest;
         }
     }
 }

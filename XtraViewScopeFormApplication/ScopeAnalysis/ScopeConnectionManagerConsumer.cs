@@ -17,14 +17,14 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
         {
             while (Program.runConnectionManagerConsumer)
             {
-                IScopeConnectionManager scopeConnectionManager = Program.scopeConnectionBlockingQueue.Take();
+                IScopeConnectionManager scopeConnectionManager = Program.scopeConnectionBlockingCollection.Take();
 
                 SignalAnalyser signalAnalyser = new Add2SignalAnalyser();
                 signalAnalyser.StartTime = scopeConnectionManager.StartTime;
                 signalAnalyser.Waveforms = scopeConnectionManager.Waveforms;
                 signalAnalyser.WaveformInfo = scopeConnectionManager.WaveformInfo;
 
-                Task.Factory.StartNew(signalAnalyser.analyseGenericSignal);
+                Task.Factory.StartNew(signalAnalyser.analyseScopeSignal);
             }
         }
     }

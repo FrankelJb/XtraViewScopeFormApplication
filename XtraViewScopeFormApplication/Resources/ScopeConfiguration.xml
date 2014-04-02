@@ -1,7 +1,7 @@
 ﻿<ScopeProperties>
   <!-- These are the scope properties -->
   <ChannelName>0</ChannelName>
-  <Coupling>DC</Coupling>
+  <Coupling>AC</Coupling>
   <IdQuery>false</IdQuery>
   <NumberOfMeasurentSamplesToFetch>400</NumberOfMeasurentSamplesToFetch>
   <NumberOfPointsMin>70000</NumberOfPointsMin>
@@ -9,7 +9,7 @@
   <Offset>0.0</Offset>
   <ProbeAttenuation>1.0</ProbeAttenuation>
   <ReferencePosition>0.10</ReferencePosition>
-  <ReportContents>Xml</ReportContents>
+  <ReportContents>XmlJson</ReportContents>
   <ResetDevice>false</ResetDevice>
   <ResourceName>Dev1</ResourceName>
   <SampleRateMin>200000</SampleRateMin>

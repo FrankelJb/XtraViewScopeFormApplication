@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using XtraViewScope.Models.Enums;
+using XtraViewScopeFormApplication.Models.Enums;
 using XtraViewScopeFormApplication.Models.XmpPackets;
 
 namespace XtraViewScope.Models
@@ -14,5 +15,12 @@ namespace XtraViewScope.Models
     /// </summary>
     public class Heartbeat : XmpPacketTransmission
     {
+        public override XmpPacketTransmissionType XmpPacketTransmissionType
+        {
+            get 
+            {
+                return XmpPacketTransmissionType.Heartbeat;
+            }
+        }
     }
 }

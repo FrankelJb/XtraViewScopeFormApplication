@@ -23,14 +23,18 @@ namespace XtraViewScopeFormApplication
         //private static readonly ILog log = LogManager.GetLogger(typeof (Program)) ;
 
         public static IConfigManager configManager;
+        public static IConfigManager keyPressConfigManager;
         public static List<IReportWriter> reportWriters;
-        public static BackgroundWorker signalAnalyserBackgroundWorker = new BackgroundWorker();
 
-        public static BlockingCollection<IScopeConnectionManager> scopeConnectionBlockingQueue = new BlockingCollection<IScopeConnectionManager>();
+        public static BlockingCollection<IScopeConnectionManager> scopeConnectionBlockingCollection = new BlockingCollection<IScopeConnectionManager>();
         public static bool runConnectionManagerConsumer = true;
 
-        public static BlockingCollection<SignalAnalysisResultContainer> signalAnalysisResultBlockingQueue = new BlockingCollection<SignalAnalysisResultContainer>();
+        public static BlockingCollection<SignalAnalysisResultContainer> signalAnalysisResultBlockingCollection = new BlockingCollection<SignalAnalysisResultContainer>();
         public static bool runSignalAnalysisResultConsumer = true;
+
+        //public static BlockingCollection<SignalAnalysisResultContainer> heartbeatTimingBlockingQueue = new BlockingCollection<SignalAnalysisResultContainer>();
+        //public static bool runSignalAnalysisResultConsumer = true;
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>

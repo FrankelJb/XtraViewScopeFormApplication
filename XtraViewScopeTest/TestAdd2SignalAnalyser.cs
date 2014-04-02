@@ -3,14 +3,18 @@ using NationalInstruments;
 using Newtonsoft.Json;
 using ScopeLibrary.SignalAnalysis;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using XtraViewScope.Models;
 using XtraViewScope.Models.Dictionaries;
 using XtraViewScope.Models.Enums;
 using XtraViewScope.ScopeAnalysis;
+using XtraViewScopeFormApplication.Models.Enums;
+using XtraViewScopeFormApplication.Models.XmpPackets;
 
 namespace XtraViewScopeTest
 {

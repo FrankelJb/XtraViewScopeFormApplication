@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using NationalInstruments;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -43,18 +44,9 @@ namespace XtraViewScopeFormApplication.Models.XmpPackets
             }
         }
 
-        private XmpPacketTransmissionType xmpPacketTransmissionType;
-        [JsonIgnore]
-        public XmpPacketTransmissionType XmpPacketTransmissionType
+        public abstract XmpPacketTransmissionType XmpPacketTransmissionType
         {
-            get
-            {
-                return xmpPacketTransmissionType;
-            }
-            set
-            {
-                xmpPacketTransmissionType = value;
-            }
+            get;
         }
 
         private Collection<Add2Packet> add2Packets;
@@ -67,6 +59,19 @@ namespace XtraViewScopeFormApplication.Models.XmpPackets
             set
             {
                 add2Packets = value;
+            }
+        }
+
+        private PrecisionDateTime timeCaptured;
+        public PrecisionDateTime TimeCaptured
+        {
+            get
+            {
+                return timeCaptured;
+            }
+            set
+            {
+                timeCaptured = value;
             }
         }
     }
