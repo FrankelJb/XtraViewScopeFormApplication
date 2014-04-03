@@ -1,19 +1,11 @@
-﻿using NationalInstruments;
-using ScopeLibrary.ReportWriting;
-using ScopeLibrary.SignalAnalysis;
+﻿using ScopeLibrary.ReportWriting;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using XtraViewScope.Models;
-using XtraViewScope.ScopeAnalysis;
-using XtraViewScopeFormApplication.Models;
-using XtraViewScopeFormApplication.Models.Enums;
-using XtraViewScopeFormApplication.ScopeAnalysis;
+using XtraViewScopeFormApplication.Models.XmpTransmission;
 
-namespace XtraViewScopeFormApplication.ReportWriting
+namespace XtraViewScopeFormApplication.ScopeAnalysis
 {
     public class SignalAnalysisResultConsumer
     {
@@ -94,6 +86,8 @@ namespace XtraViewScopeFormApplication.ReportWriting
             {
                 WriteHexValuesToFile(sb.Append(Environment.NewLine));
             }
+
+            Program.log.Info("IR button pressed, hex = " + sb.ToString());
         }
 
         private void WriteHexValuesToFile(StringBuilder sb)
@@ -133,50 +127,9 @@ namespace XtraViewScopeFormApplication.ReportWriting
                 Task.Factory.StartNew(reportWriter.WriteReport);
             }
 
-            XtraViewScopeForm.uiBackgroundWorker.ReportProgress(-1, HeartbeatTiming);
-        }
-    }
-
-    public class HeartbeatTiming
-    {
-        public int numberOfHeartbeats { get; set; }
-        public PrecisionTimeSpan? Total { get; set; }
-        public double Average { get; set; }
-        public PrecisionTimeSpan? Shortest { get; set; }
-        public PrecisionTimeSpan? Longest { get; set; }
-        private PrecisionDateTime? latestHeartbeatDateTime;
-        public PrecisionDateTime? LatestHeartbeatDateTime
-        {
-            get
+            if (XtraViewScopeForm.uiBackgroundWorker.IsBusy)
             {
-                return latestHeartbeatDateTime;
-            }
-            set
-            {
-                if (latestHeartbeatDateTime == null)
-                {
-                    latestHeartbeatDateTime = value;
-                    Shortest = PrecisionTimeSpan.MaxValue;
-                    Longest = PrecisionTimeSpan.MinValue;
-                    Total = new PrecisionTimeSpan();
-                }
-                else
-                {
-                    if (Shortest.Value > value - latestHeartbeatDateTime.Value)
-                    {
-                        Shortest = value - latestHeartbeatDateTime.Value;
-                    }
-                    if (Longest.Value < value - latestHeartbeatDateTime.Value)
-                    {
-                        Longest = value - latestHeartbeatDateTime.Value;
-                    }
-
-                    Total += value - latestHeartbeatDateTime;
-                    numberOfHeartbeats++;
-                    latestHeartbeatDateTime = value;
-                    Average = Total.Value.TotalSeconds / numberOfHeartbeats;
-                    
-                }
+                XtraViewScopeForm.uiBackgroundWorker.ReportProgress(-1, HeartbeatTiming);
             }
         }
     }

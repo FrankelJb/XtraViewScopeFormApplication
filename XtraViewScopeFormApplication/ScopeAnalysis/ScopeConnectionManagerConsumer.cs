@@ -1,13 +1,6 @@
-﻿using Newtonsoft.Json;
-using ScopeLibrary.ConnectionManagement;
+﻿using ScopeLibrary.ConnectionManagement;
 using ScopeLibrary.SignalAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using XtraViewScope.Models;
-using XtraViewScope.ScopeAnalysis;
 
 namespace XtraViewScopeFormApplication.ScopeAnalysis
 {

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using XtraViewScopeFormApplication.Models.Enums;
-using XtraViewScopeFormApplication.Models.XmpPackets;
+﻿using XtraViewScopeFormApplication.Models.Enums;
 
-namespace XtraViewScopeFormApplication.ScopeAnalysis
+namespace XtraViewScopeFormApplication.Models.XmpTransmission
 {
     public class IrInbound : XmpPacketTransmission
     {

@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 using ScopeLibrary.Util;
 using System;
 
-namespace XtraViewScope.Models
+namespace XtraViewScopeFormApplication.Models.XmpTransmission
 {
     public class NibbleJsonConverter : JsonConverter
     {

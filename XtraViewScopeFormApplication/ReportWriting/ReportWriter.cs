@@ -1,9 +1,8 @@
 ﻿using ScopeLibrary.ReportWriting;
 using System;
 using System.IO;
-using XtraViewScopeFormApplication;
 
-namespace XtraViewScope.ReportWriting
+namespace XtraViewScopeFormApplication.ReportWriting
 {
     public class ReportWriter : IReportWriter
     {
@@ -81,6 +80,7 @@ namespace XtraViewScope.ReportWriting
             }
 
             File.WriteAllText(filePath.ToString(), Report.ReportContents.ToString());
+            Program.log.Info("Wrote hearbeat data to " + filePath.ToString());
         }
     }
 }

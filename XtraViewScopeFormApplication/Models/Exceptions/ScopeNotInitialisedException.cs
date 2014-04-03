@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace XtraViewScope.ConnectionManagement
+namespace XtraViewScopeFormApplication.Models.Exceptions
 {
     public class ScopeNotInitialisedException : Exception
     {

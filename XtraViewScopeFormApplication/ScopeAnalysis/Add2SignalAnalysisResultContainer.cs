@@ -1,15 +1,7 @@
 ﻿using ScopeLibrary.SignalAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using XtraViewScope.Models;
-using XtraViewScopeFormApplication.Models.XmpPackets;
-using XtraViewScopeFormApplication.ScopeAnalysis;
+using XtraViewScopeFormApplication.Models.XmpTransmission;
 
-namespace XtraViewScope.ScopeAnalysis
+namespace XtraViewScopeFormApplication.ScopeAnalysis
 {
     public class Add2SignalAnalysisResult : ISignalAnalysisResult
     {

@@ -2,13 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using XtraViewScope.Models.Enums;
-using XtraViewScope.Models.Exceptions;
+using XtraViewScopeFormApplication.Models.Enums;
 
-namespace XtraViewScope.Models
+namespace XtraViewScopeFormApplication.Models.XmpTransmission
 {
     /// <summary>
     /// ADD2 packets are a type of XMP Packet defined by having 8 nibbles. 

@@ -1,15 +1,8 @@
 ﻿using NationalInstruments;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using XtraViewScope.Models;
 using XtraViewScopeFormApplication.Models.Enums;
 
-namespace XtraViewScopeFormApplication.Models.XmpPackets
+namespace XtraViewScopeFormApplication.Models.XmpTransmission
 {
     public abstract class XmpPacketTransmission
     {
@@ -37,10 +30,6 @@ namespace XtraViewScopeFormApplication.Models.XmpPackets
                     xmpPacketTransmissionStatus = Enums.XmpPacketTransmissionStatus.Passed;
                 }
                 return xmpPacketTransmissionStatus;
-            }
-            set
-            {
-                xmpPacketTransmissionStatus = value;
             }
         }
 

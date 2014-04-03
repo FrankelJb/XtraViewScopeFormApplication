@@ -1,21 +1,14 @@
 ﻿using NationalInstruments;
-using NationalInstruments.ModularInstruments.NIScope;
 using ScopeLibrary.SignalAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
-using XtraViewScope.Models;
-using XtraViewScope.Models.Dictionaries;
-using XtraViewScope.Models.Enums;
-using XtraViewScopeFormApplication;
-using XtraViewScopeFormApplication.Models;
-using XtraViewScopeFormApplication.Models.Enums;
-using XtraViewScopeFormApplication.Models.XmpPackets;
-using XtraViewScopeFormApplication.ScopeAnalysis;
+using XtraViewScopeFormApplication.Models.Dictionaries;
+using XtraViewScopeFormApplication.Models.XmpTransmission;
 
-namespace XtraViewScope.ScopeAnalysis
+namespace XtraViewScopeFormApplication.ScopeAnalysis
 {
     public class Add2SignalAnalyser : SignalAnalyser
     {
@@ -41,8 +34,7 @@ namespace XtraViewScope.ScopeAnalysis
             StringBuilder sb = new StringBuilder();
             while (i < waveform.SampleCount)
             {
-                ////TODO: remove this sb stuff
-                //sb.Append(period.ToString("ss.FFFFFFF"));
+                //sb.Append(period);
                 //sb.Append("\t");
                 //sb.Append(waveform.Samples[i].Value.ToString());
                 //sb.Append(Environment.NewLine);
@@ -202,6 +194,8 @@ namespace XtraViewScope.ScopeAnalysis
                 i++;
             }
 
+            //WriteData(sb);
+
             if(add2Packets[0].Nibbles[0].DecimalValue == 14)
             {
                 //There is one nibble that remains on the last packet because there is only noise at the end of the heartbeat
@@ -219,24 +213,18 @@ namespace XtraViewScope.ScopeAnalysis
             }
             else if(add2Packets[0].Nibbles[0].DecimalValue == 1)
             {
+                //IR button presses are sent multiple times if the user long-presses a button, truncate the message to be 2 packets long
                 for (int j = add2Packets.Count - 1; j > 1 ; j--)
                 {
                     add2Packets.RemoveAt(j);
                 }
 
+                //Remove the noise at the end
                 if (add2Packets[add2Packets.Count - 1].Nibbles.Count == 9)
                 {
                     add2Packets[add2Packets.Count - 1].Nibbles.RemoveAt(8);
                 }
-                //else
-                //{
-                //    Program.log.Error("User long pressed button, truncating > 3 captured packets");
-                //    for (int j = 2; j < add2Packets.Count; j++)
-                //    {
-                //        add2Packets.RemoveAt(j);
-                //    }
-                //    System.Diagnostics.Debug.WriteLine(add2Packets[add2Packets.Count - 1].Nibbles.Count);
-                //}
+
                 add2SignalAnalysisResult.XmpPacketTransmission = new IrInbound();
                 add2SignalAnalysisResult.XmpPacketTransmission.Add2Packets = add2Packets;
 
@@ -245,6 +233,20 @@ namespace XtraViewScope.ScopeAnalysis
             }
         }
 
-        
+        private void WriteData(StringBuilder sb)
+        {
+            //TODO: remove this method and its associated sb
+            FileInfo filePath = new FileInfo(Path.Combine(@"C:\waveform", @"dataPoints.txt"));
+            if (!filePath.Exists)
+            {
+                filePath.Create().Close();
+            }
+            else
+            {
+                //File.WriteAllText(filePath.ToString(), String.Empty);
+            }
+
+            File.WriteAllText(filePath.ToString(), sb.ToString());
+        }
     }
 }

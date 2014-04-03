@@ -9,9 +9,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using XtraViewScope.ConnectionManagement;
-using XtraViewScope.ReportWriting;
-using XtraViewScope.ScopeAnalysis;
+using XtraViewScopeFormApplication.ConnectionManagement;
+using XtraViewScopeFormApplication.Models.XmpTransmission;
 using XtraViewScopeFormApplication.ReportWriting;
 using XtraViewScopeFormApplication.ScopeAnalysis;
 
@@ -20,6 +19,7 @@ namespace XtraViewScopeFormApplication
     public partial class XtraViewScopeForm : Form
     {
         SignalAnalysisResultConsumer signalAnalysisResultConsumer;
+
         public XtraViewScopeForm()
         {
             InitializeComponent();
@@ -28,7 +28,8 @@ namespace XtraViewScopeFormApplication
             initialiseScopeConfigurationComponenents();
             Program.log.Info("Scope configuration components initialised");
 
-             signalAnalysisResultConsumer = new SignalAnalysisResultConsumer(this);
+            //Instantiate the analysed signal consumer with a reference to the form so that the results of analysed signal can be written to the gui
+            signalAnalysisResultConsumer = new SignalAnalysisResultConsumer(this);
         }
 
         private void initialiseScopeConfigurationComponenents()
@@ -52,9 +53,8 @@ namespace XtraViewScopeFormApplication
                 Program.configManager = new XmlConfigManager();
             }
 
+            //Instantiate the keyPressConfigManager
             Program.keyPressConfigManager = new PropertyConfigManager();
-            Program.keyPressConfigManager.ConfigFilePath = @"C:\Projects\XtraViewScopeFormApplication\XtraViewScopeFormApplication\Resources\irKeyMapping.properties";
-            Program.keyPressConfigManager.loadConfigDocument();
 
             //Load the config file and set the default save file format
             Program.configManager.ConfigFilePath = Path.GetFullPath(ConfigFilePath);
@@ -85,8 +85,10 @@ namespace XtraViewScopeFormApplication
 
         }
 
+        private int heartbeatCount = 0;
         private void startButton_Click(object sender, EventArgs e)
         {
+            heartbeatCount = 0;
             startButton.Text = "0";
             pictureBox1.Image = Properties.Resources.Busy;
 
@@ -103,6 +105,10 @@ namespace XtraViewScopeFormApplication
             {
                 Program.configManager = new XmlConfigManager();
             }
+
+            //Load the hex values of the key presseses into a dictionary
+            Program.keyPressConfigManager.ConfigFilePath = @"..\..\Resources\irKeyMapping.properties";
+            Program.keyPressConfigManager.loadConfigDocument();
 
             //Load the config file and set the default save file format
             Program.configManager.ConfigFilePath = Path.GetFullPath(ConfigFilePath);
@@ -151,10 +157,12 @@ namespace XtraViewScopeFormApplication
         {
             SignalAnalyser signalAnalyser = new Add2SignalAnalyser();
             
+            //Start the connection manager consumer
             ScopeConnectionManagerConsumer scopeConnectionManagerConsumer = new ScopeConnectionManagerConsumer();
             Program.runConnectionManagerConsumer = true;
             Task.Factory.StartNew(scopeConnectionManagerConsumer.consumeConnectionManager);
 
+            //Set the signal analysis heartbeat to be an empty timing object
             signalAnalysisResultConsumer.clearHeartBeatTiming();
             signalAnalysisResultConsumer.OutputDirectory = OutputDirectory;
             signalAnalysisResultConsumer.FileNameFormat = FileNameFormat;
@@ -174,9 +182,6 @@ namespace XtraViewScopeFormApplication
                 signalAnalyser.Waveforms = xtraViewScopeConnectionManager.Waveforms;
                 signalAnalyser.WaveformInfo = xtraViewScopeConnectionManager.WaveformInfo;
 
-                //Analyse the acquired signal
-                //Program.signalAnalyserBackgroundWorker.RunWorkerAsync(signalAnalyser);
-
                 if (uiBackgroundWorker.CancellationPending)
                 {
                     e.Cancel = true;
@@ -184,21 +189,16 @@ namespace XtraViewScopeFormApplication
                     Program.runConnectionManagerConsumer = false;
                     return;
                 }
-                //Generate the link on the interface in another thread that waits for the report to be created first.
-                int passCount = count;
-                Task.Factory.StartNew(() => uiBackgroundWorker.ReportProgress(passCount));
+
                 count++;
             }
         }
 
         private void uiBackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            if (e.ProgressPercentage > 0)
+            if (e.ProgressPercentage == -1)
             {
-                startButton.Text = e.ProgressPercentage.ToString();
-            }
-            else if (e.ProgressPercentage == -1)
-            {
+                startButton.Text = heartbeatCount++.ToString();
                 HeartbeatTiming hearbeatTiming = (HeartbeatTiming)e.UserState;
                 averageLabel.Text = "Average: " + Math.Round(hearbeatTiming.Average, 3);
                 shortestLabel.Text = "Shortest: " + Math.Round(hearbeatTiming.Shortest.Value.TotalSeconds, 3);
@@ -207,9 +207,11 @@ namespace XtraViewScopeFormApplication
             else if (e.ProgressPercentage == -2)
             {
                 string keyPress = (string)e.UserState;
-                if(irKeyPresses.Text.Length > 0){
+                if(irKeyPresses.Text.Length > 0)
+                {
                     irKeyPresses.AppendText(Environment.NewLine);
                 }
+
                 if (Program.keyPressConfigManager.getProperty(keyPress) != null)
                 {
                     irKeyPresses.AppendText(Program.keyPressConfigManager.getProperty(keyPress));
@@ -245,6 +247,12 @@ namespace XtraViewScopeFormApplication
             }
             uiBackgroundWorker.CancelAsync();
             xtraViewScopeConnectionManager.CloseSession();
+        }
+
+
+        private void clearKeyPresses_Click(object sender, EventArgs e)
+        {
+            irKeyPresses.Clear();
         }
 
         private void configFilePath_Click(object sender, EventArgs e)
@@ -327,7 +335,18 @@ namespace XtraViewScopeFormApplication
             outputDirectory.Enabled = isEnabled;
             fileNameFormat.Enabled = isEnabled;
             startButton.Enabled = isEnabled;
+            shouldSaveKeyPresses.Enabled = isEnabled;
             this.Refresh();
+        }
+
+        private void graphHeartbeats_Click(object sender, EventArgs e)
+        {
+            Process p = new Process(); // create process (i.e., the python program
+            p.StartInfo.FileName = @"C:\Python27\python.exe";
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.UseShellExecute = false; // make sure we can read the output from stdout
+            p.StartInfo.Arguments = @"C:\Projects\Python\wxPython.py"; // start the python program with two parameters
+            p.Start();
         }
     }
 }

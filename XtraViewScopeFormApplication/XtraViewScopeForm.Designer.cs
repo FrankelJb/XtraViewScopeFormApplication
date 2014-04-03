@@ -52,6 +52,8 @@ namespace XtraViewScopeFormApplication
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.shouldSaveKeyPresses = new System.Windows.Forms.CheckBox();
+            this.clearKeyPresses = new System.Windows.Forms.Button();
+            this.graphHeartbeats = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -242,11 +244,33 @@ namespace XtraViewScopeFormApplication
             this.shouldSaveKeyPresses.Text = "Save Key Presses to File";
             this.shouldSaveKeyPresses.UseVisualStyleBackColor = true;
             // 
+            // clearKeyPresses
+            // 
+            this.clearKeyPresses.Location = new System.Drawing.Point(12, 484);
+            this.clearKeyPresses.Name = "clearKeyPresses";
+            this.clearKeyPresses.Size = new System.Drawing.Size(75, 23);
+            this.clearKeyPresses.TabIndex = 21;
+            this.clearKeyPresses.Text = "Clear";
+            this.clearKeyPresses.UseVisualStyleBackColor = true;
+            this.clearKeyPresses.Click += new System.EventHandler(this.clearKeyPresses_Click);
+            // 
+            // graphHeartbeats
+            // 
+            this.graphHeartbeats.Location = new System.Drawing.Point(360, 279);
+            this.graphHeartbeats.Name = "graphHeartbeats";
+            this.graphHeartbeats.Size = new System.Drawing.Size(75, 35);
+            this.graphHeartbeats.TabIndex = 22;
+            this.graphHeartbeats.Text = "Graph Heartbeats";
+            this.graphHeartbeats.UseVisualStyleBackColor = true;
+            this.graphHeartbeats.Click += new System.EventHandler(this.graphHeartbeats_Click);
+            // 
             // XtraViewScopeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(674, 493);
+            this.ClientSize = new System.Drawing.Size(674, 519);
+            this.Controls.Add(this.graphHeartbeats);
+            this.Controls.Add(this.clearKeyPresses);
             this.Controls.Add(this.shouldSaveKeyPresses);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
@@ -298,6 +322,8 @@ namespace XtraViewScopeFormApplication
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         public System.Windows.Forms.CheckBox shouldSaveKeyPresses;
+        private System.Windows.Forms.Button clearKeyPresses;
+        private System.Windows.Forms.Button graphHeartbeats;
     }
 }
 

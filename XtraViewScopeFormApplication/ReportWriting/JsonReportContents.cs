@@ -1,20 +1,10 @@
-﻿using NationalInstruments;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using ScopeLibrary.ReportWriting;
 using ScopeLibrary.SignalAnalysis;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-using XtraViewScope.Models;
-using XtraViewScope.Models.Exceptions;
-using XtraViewScope.ScopeAnalysis;
+using XtraViewScopeFormApplication.Models.XmpTransmission;
 
-namespace XtraViewScope.ReportWriting
+namespace XtraViewScopeFormApplication.ReportWriting
 {
     public class JsonReportContents : ReportContents
     {

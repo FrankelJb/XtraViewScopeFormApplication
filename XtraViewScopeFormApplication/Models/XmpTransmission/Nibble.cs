@@ -3,9 +3,10 @@ using Newtonsoft.Json;
 using ScopeLibrary.Util;
 using System;
 using System.Collections.Generic;
-using XtraViewScope.Models.Dictionaries;
+using XtraViewScopeFormApplication.Models.Dictionaries;
+using XtraViewScopeFormApplication.Models.Enums;
 
-namespace XtraViewScope.Models
+namespace XtraViewScopeFormApplication.Models.XmpTransmission
 {
     public class Nibble
     {

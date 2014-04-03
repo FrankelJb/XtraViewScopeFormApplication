@@ -3,8 +3,9 @@ using NationalInstruments.ModularInstruments.NIScope;
 using ScopeLibrary.ConfigManagement;
 using ScopeLibrary.ConnectionManagement;
 using System.IO;
-using XtraViewScope.ConnectionManagement;
 using XtraViewScopeFormApplication;
+using XtraViewScopeFormApplication.ConnectionManagement;
+using XtraViewScopeFormApplication.Models.Exceptions;
 
 namespace XtraViewScopeTest
 {

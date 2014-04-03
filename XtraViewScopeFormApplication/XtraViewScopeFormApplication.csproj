@@ -58,9 +58,10 @@
   <ItemGroup>
     <Compile Include="ConnectionManagement\XtraViewScopeConnectionManager.cs" />
     <Compile Include="Models\Enums\XmpPacketLayerType.cs" />
-    <Compile Include="Models\IrInbound.cs" />
-    <Compile Include="Models\XmpPackets\XmpPacketLayer.cs" />
-    <Compile Include="Models\XmpTransmissionDelegates.cs" />
+    <Compile Include="Models\XmpTransmission\HeartbeatTiming.cs" />
+    <Compile Include="Models\XmpTransmission\IrInbound.cs" />
+    <Compile Include="Models\XmpTransmission\XmpPacketTransmission.cs" />
+    <Compile Include="Models\XmpTransmission\XmpTransmissionDelegates.cs" />
     <Compile Include="ScopeAnalysis\SignalAnalysisResultConsumer.cs" />
     <Compile Include="ScopeAnalysis\ScopeConnectionManagerConsumer.cs" />
     <Compile Include="XtraViewScopeForm.cs">
@@ -69,16 +70,16 @@
     <Compile Include="XtraViewScopeForm.Designer.cs">
       <DependentUpon>XtraViewScopeForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Models\XmpPackets\Add2Packet.cs" />
+    <Compile Include="Models\XmpTransmission\Add2Packet.cs" />
     <Compile Include="Models\Dictionaries\Add2Dictionary.cs" />
     <Compile Include="Models\Enums\BinaryData.cs" />
     <Compile Include="Models\Enums\XmpPacketTransmissionStatus.cs" />
     <Compile Include="Models\Enums\MessageType.cs" />
     <Compile Include="Models\Exceptions\MalformedXmpPacketException.cs" />
     <Compile Include="Models\Exceptions\ScopeNotInitialisedException.cs" />
-    <Compile Include="Models\XmpPackets\Heartbeat.cs" />
-    <Compile Include="Models\Nibble.cs" />
-    <Compile Include="Models\NibbleJsonConverter.cs" />
+    <Compile Include="Models\XmpTransmission\Heartbeat.cs" />
+    <Compile Include="Models\XmpTransmission\Nibble.cs" />
+    <Compile Include="Models\XmpTransmission\NibbleJsonConverter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReportWriting\JsonReportContents.cs" />

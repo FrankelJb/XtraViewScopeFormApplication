@@ -3,9 +3,9 @@ using NationalInstruments.ModularInstruments.NIScope;
 using ScopeLibrary;
 using ScopeLibrary.ConnectionManagement;
 using System;
-using XtraViewScopeFormApplication;
+using XtraViewScopeFormApplication.Models.Exceptions;
 
-namespace XtraViewScope.ConnectionManagement
+namespace XtraViewScopeFormApplication.ConnectionManagement
 {
     public class XtraViewScopeConnectionManager : IScopeConnectionManager
     {
@@ -15,7 +15,6 @@ namespace XtraViewScope.ConnectionManagement
         public XtraViewScopeConnectionManager()
         {
             ConfigManager = Program.configManager;
-
         }
 
         private string channelName = "0";
@@ -106,7 +105,7 @@ namespace XtraViewScope.ConnectionManagement
             }
         }
 
-        private long numberOfMeasurentSamplesToFetch = 400;
+        private long numberOfMeasurentSamplesToFetch = -1;
         public long NumberOfMeasurementSamplesToFetch
         {
             get
@@ -211,11 +210,11 @@ namespace XtraViewScope.ConnectionManagement
             scopeSession.Acquisition.NumberOfMeasurementSamplesToFetch = NumberOfMeasurementSamplesToFetch;
 
             StartTime = PrecisionDateTime.Now;
-            if (ChannelName.Equals("0"))
+            if (ChannelName.Contains("0"))
             {
                 waveforms = scopeSession.Channels[ScopeTriggerSource.Channel0].Measurement.FetchDouble(Timeout, actualRecordLength, waveforms, out waveformInfo);
             }
-            else if (ChannelName.Equals("1"))
+            if (ChannelName.Contains("1"))
             {
                 waveforms = scopeSession.Channels[ScopeTriggerSource.Channel1].Measurement.FetchDouble(Timeout, actualRecordLength, waveforms, out waveformInfo);
             }
@@ -269,7 +268,15 @@ namespace XtraViewScope.ConnectionManagement
                         double triggerLevel = 0.5;
                         ScopeTriggerSlope triggerSlope = ScopeTriggerSlope.Positive;
                         ScopeTriggerCoupling triggerCoupling = ScopeTriggerCoupling.DC;
-                        ScopeTriggerSource triggerSource = ScopeTriggerSource.Channel0;
+                        ScopeTriggerSource triggerSource = null;
+                        if (ChannelName.Contains("0"))
+                        {
+                            triggerSource = ScopeTriggerSource.Channel0;
+                        }
+                        if (ChannelName.Contains("1"))
+                        {
+                            triggerSource = ScopeTriggerSource.Channel1;
+                        }
                         PrecisionTimeSpan triggerHoldoff = PrecisionTimeSpan.Zero;
                         PrecisionTimeSpan triggerDelay = PrecisionTimeSpan.Zero;
                         ScopeSession.Trigger.EdgeTrigger.Configure(triggerSource, triggerLevel, triggerSlope, triggerCoupling, triggerHoldoff, triggerDelay);
@@ -377,7 +384,15 @@ namespace XtraViewScope.ConnectionManagement
                 throw new ScopeNotInitialisedException("Scope must be initialised before vertical paramters can be set");
             }
             bool enabled = true; //This can be false but that would disable the channel. Which, under these conditions, would be quite silly.
-            scopeSession.Channels[ScopeTriggerSource.Channel0].Configure(VerticalRange, Offset, Coupling, ProbeAttenuation, enabled);
+
+            if (ChannelName.Contains("0"))
+            {
+                scopeSession.Channels[ScopeTriggerSource.Channel0].Configure(VerticalRange, Offset, Coupling, ProbeAttenuation, enabled);
+            }
+            if (ChannelName.Contains("1"))
+            {
+                scopeSession.Channels[ScopeTriggerSource.Channel1].Configure(VerticalRange, Offset, Coupling, ProbeAttenuation, enabled);
+            }
         }
 
         private bool enforceRealTime = false;

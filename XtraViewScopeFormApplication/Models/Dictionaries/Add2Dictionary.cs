@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using XtraViewScopeFormApplication.Models.Enums;
 
-namespace XtraViewScope.Models.Dictionaries
+namespace  XtraViewScopeFormApplication.Models.Dictionaries
 {
     public static class Add2Dictionary
     {
