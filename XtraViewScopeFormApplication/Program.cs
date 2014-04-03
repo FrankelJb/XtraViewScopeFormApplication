@@ -29,9 +29,6 @@ namespace XtraViewScopeFormApplication
         public static BlockingCollection<IScopeConnectionManager> scopeConnectionBlockingCollection = new BlockingCollection<IScopeConnectionManager>();
         public static bool runConnectionManagerConsumer = true;
 
-        public static BlockingCollection<SignalAnalysisResultContainer> signalAnalysisResultBlockingCollection = new BlockingCollection<SignalAnalysisResultContainer>();
-        public static bool runSignalAnalysisResultConsumer = true;
-
         //public static BlockingCollection<SignalAnalysisResultContainer> heartbeatTimingBlockingQueue = new BlockingCollection<SignalAnalysisResultContainer>();
         //public static bool runSignalAnalysisResultConsumer = true;
 

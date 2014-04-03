@@ -10,6 +10,7 @@ using XtraViewScope.Models;
 using XtraViewScope.Models.Dictionaries;
 using XtraViewScope.Models.Enums;
 using XtraViewScopeFormApplication;
+using XtraViewScopeFormApplication.Models;
 using XtraViewScopeFormApplication.Models.Enums;
 using XtraViewScopeFormApplication.Models.XmpPackets;
 using XtraViewScopeFormApplication.ScopeAnalysis;
@@ -18,8 +19,6 @@ namespace XtraViewScope.ScopeAnalysis
 {
     public class Add2SignalAnalyser : SignalAnalyser
     {
-        public bool PrintHexToFile { get; set; }
-
         public override void analyseScopeSignal()
         {
             PrecisionDateTime period = StartTime + PrecisionTimeSpan.FromSeconds(WaveformInfo[0].AbsoluteInitialX);
@@ -209,7 +208,6 @@ namespace XtraViewScope.ScopeAnalysis
                 if (add2Packets.Count == 9 && add2Packets[8].Nibbles.Count == 9)
                 {
                     add2Packets[8].Nibbles.RemoveAt(8);
-                    
                 }
 
                 add2SignalAnalysisResult.XmpPacketTransmission = new Heartbeat();
@@ -217,11 +215,11 @@ namespace XtraViewScope.ScopeAnalysis
                 add2SignalAnalysisResult.XmpPacketTransmission.TimeCaptured = StartTime + PrecisionTimeSpan.FromSeconds(WaveformInfo[0].AbsoluteInitialX);
 
                 signalAnalysisResultContainer.SignalAnalysisResult = add2SignalAnalysisResult;
-                Program.signalAnalysisResultBlockingCollection.Add(signalAnalysisResultContainer);
+                XmpTransmissionDelegates.raiseHearbeatAnalysed(signalAnalysisResultContainer);
             }
             else if(add2Packets[0].Nibbles[0].DecimalValue == 1)
             {
-                for (int j = 2; j < add2Packets.Count; j++)
+                for (int j = add2Packets.Count - 1; j > 1 ; j--)
                 {
                     add2Packets.RemoveAt(j);
                 }
@@ -230,59 +228,23 @@ namespace XtraViewScope.ScopeAnalysis
                 {
                     add2Packets[add2Packets.Count - 1].Nibbles.RemoveAt(8);
                 }
-                else
-                {
-                    Program.log.Error("User long pressed button, truncating > 3 captured packets");
-                    for (int j = 2; j < add2Packets.Count; j++)
-                    {
-                        add2Packets.RemoveAt(j);
-                    }
-                    System.Diagnostics.Debug.WriteLine(add2Packets[add2Packets.Count - 1].Nibbles.Count);
-                }
+                //else
+                //{
+                //    Program.log.Error("User long pressed button, truncating > 3 captured packets");
+                //    for (int j = 2; j < add2Packets.Count; j++)
+                //    {
+                //        add2Packets.RemoveAt(j);
+                //    }
+                //    System.Diagnostics.Debug.WriteLine(add2Packets[add2Packets.Count - 1].Nibbles.Count);
+                //}
                 add2SignalAnalysisResult.XmpPacketTransmission = new IrInbound();
                 add2SignalAnalysisResult.XmpPacketTransmission.Add2Packets = add2Packets;
 
-                if (PrintHexToFile)
-                {
-                    foreach (Add2Packet add2Packet in add2Packets)
-                    {
-                        foreach (Nibble nibble in add2Packet.Nibbles)
-                        {
-                            sb.Append(String.Format("{0:X}", nibble.DecimalValue));
-                        }
-                        if (sb.Length > 0)
-                            sb.Append(Environment.NewLine);
-                    }
-
-                    sb.Append("----" + Environment.NewLine);
-                    System.Diagnostics.Debug.WriteLine(sb.ToString());
-                    WriteHexValuesToFile(sb);
-                }
-
                 signalAnalysisResultContainer.SignalAnalysisResult = add2SignalAnalysisResult;
-                Program.signalAnalysisResultBlockingCollection.Add(signalAnalysisResultContainer);
+                XmpTransmissionDelegates.raiseIrInboundAnalysed(signalAnalysisResultContainer);
             }
         }
 
-        void WriteHexValuesToFile(StringBuilder sb)
-        {
-            string directoryPath = @"C:\waveform";
-            if (!Directory.Exists(directoryPath))
-            {
-                Directory.CreateDirectory(directoryPath);
-            }
-
-            FileInfo filePath = new FileInfo(Path.Combine(directoryPath, @"hexKeyPresses.txt"));
-            if (!filePath.Exists)
-            {
-                filePath.Create().Close();
-            }
-            else
-            {
-                //File.WriteAllText(filePath.ToString(), String.Empty);
-            }
-
-            File.AppendAllText(filePath.ToString(), sb.ToString());
-        }
+        
     }
 }

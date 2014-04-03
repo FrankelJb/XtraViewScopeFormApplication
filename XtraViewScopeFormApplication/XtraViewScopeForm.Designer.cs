@@ -49,6 +49,9 @@ namespace XtraViewScopeFormApplication
             this.shortestLabel = new System.Windows.Forms.Label();
             this.longestLabel = new System.Windows.Forms.Label();
             this.irKeyPresses = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.shouldSaveKeyPresses = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -158,7 +161,7 @@ namespace XtraViewScopeFormApplication
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(399, 141);
+            this.pictureBox1.Location = new System.Drawing.Point(361, 141);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(100, 23);
             this.pictureBox1.TabIndex = 12;
@@ -175,7 +178,7 @@ namespace XtraViewScopeFormApplication
             // averageLabel
             // 
             this.averageLabel.AutoSize = true;
-            this.averageLabel.Location = new System.Drawing.Point(12, 178);
+            this.averageLabel.Location = new System.Drawing.Point(358, 200);
             this.averageLabel.Name = "averageLabel";
             this.averageLabel.Size = new System.Drawing.Size(53, 13);
             this.averageLabel.TabIndex = 14;
@@ -184,7 +187,7 @@ namespace XtraViewScopeFormApplication
             // shortestLabel
             // 
             this.shortestLabel.AutoSize = true;
-            this.shortestLabel.Location = new System.Drawing.Point(12, 202);
+            this.shortestLabel.Location = new System.Drawing.Point(358, 224);
             this.shortestLabel.Name = "shortestLabel";
             this.shortestLabel.Size = new System.Drawing.Size(49, 13);
             this.shortestLabel.TabIndex = 15;
@@ -193,7 +196,7 @@ namespace XtraViewScopeFormApplication
             // longestLabel
             // 
             this.longestLabel.AutoSize = true;
-            this.longestLabel.Location = new System.Drawing.Point(12, 224);
+            this.longestLabel.Location = new System.Drawing.Point(358, 246);
             this.longestLabel.Name = "longestLabel";
             this.longestLabel.Size = new System.Drawing.Size(45, 13);
             this.longestLabel.TabIndex = 16;
@@ -201,7 +204,7 @@ namespace XtraViewScopeFormApplication
             // 
             // irKeyPresses
             // 
-            this.irKeyPresses.Location = new System.Drawing.Point(12, 250);
+            this.irKeyPresses.Location = new System.Drawing.Point(12, 197);
             this.irKeyPresses.Multiline = true;
             this.irKeyPresses.Name = "irKeyPresses";
             this.irKeyPresses.ReadOnly = true;
@@ -209,11 +212,44 @@ namespace XtraViewScopeFormApplication
             this.irKeyPresses.Size = new System.Drawing.Size(311, 278);
             this.irKeyPresses.TabIndex = 17;
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(358, 178);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(88, 13);
+            this.label4.TabIndex = 18;
+            this.label4.Text = "Heartbeat Timing";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(13, 178);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(65, 13);
+            this.label5.TabIndex = 19;
+            this.label5.Text = "Key Presses";
+            // 
+            // shouldSaveKeyPresses
+            // 
+            this.shouldSaveKeyPresses.AutoSize = true;
+            this.shouldSaveKeyPresses.Location = new System.Drawing.Point(12, 147);
+            this.shouldSaveKeyPresses.Name = "shouldSaveKeyPresses";
+            this.shouldSaveKeyPresses.Size = new System.Drawing.Size(143, 17);
+            this.shouldSaveKeyPresses.TabIndex = 20;
+            this.shouldSaveKeyPresses.Text = "Save Key Presses to File";
+            this.shouldSaveKeyPresses.UseVisualStyleBackColor = true;
+            // 
             // XtraViewScopeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(674, 546);
+            this.ClientSize = new System.Drawing.Size(674, 493);
+            this.Controls.Add(this.shouldSaveKeyPresses);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.irKeyPresses);
             this.Controls.Add(this.longestLabel);
             this.Controls.Add(this.shortestLabel);
@@ -259,6 +295,9 @@ namespace XtraViewScopeFormApplication
         private System.Windows.Forms.Label longestLabel;
         public System.ComponentModel.BackgroundWorker uiBackgroundWorker;
         private System.Windows.Forms.TextBox irKeyPresses;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
+        public System.Windows.Forms.CheckBox shouldSaveKeyPresses;
     }
 }
 

@@ -60,6 +60,7 @@
     <Compile Include="Models\Enums\XmpPacketLayerType.cs" />
     <Compile Include="Models\IrInbound.cs" />
     <Compile Include="Models\XmpPackets\XmpPacketLayer.cs" />
+    <Compile Include="Models\XmpTransmissionDelegates.cs" />
     <Compile Include="ScopeAnalysis\SignalAnalysisResultConsumer.cs" />
     <Compile Include="ScopeAnalysis\ScopeConnectionManagerConsumer.cs" />
     <Compile Include="XtraViewScopeForm.cs">

@@ -19,6 +19,7 @@ namespace XtraViewScopeFormApplication
 {
     public partial class XtraViewScopeForm : Form
     {
+        SignalAnalysisResultConsumer signalAnalysisResultConsumer;
         public XtraViewScopeForm()
         {
             InitializeComponent();
@@ -26,6 +27,8 @@ namespace XtraViewScopeFormApplication
 
             initialiseScopeConfigurationComponenents();
             Program.log.Info("Scope configuration components initialised");
+
+             signalAnalysisResultConsumer = new SignalAnalysisResultConsumer(this);
         }
 
         private void initialiseScopeConfigurationComponenents()
@@ -152,11 +155,9 @@ namespace XtraViewScopeFormApplication
             Program.runConnectionManagerConsumer = true;
             Task.Factory.StartNew(scopeConnectionManagerConsumer.consumeConnectionManager);
 
-            SignalAnalysisResultConsumer signalAnalysisResultConsumer = new SignalAnalysisResultConsumer(this);
+            signalAnalysisResultConsumer.clearHeartBeatTiming();
             signalAnalysisResultConsumer.OutputDirectory = OutputDirectory;
             signalAnalysisResultConsumer.FileNameFormat = FileNameFormat;
-            Program.runSignalAnalysisResultConsumer = true;
-            Task.Factory.StartNew(signalAnalysisResultConsumer.consumeSignalAnalysisResults);
 
             int count = 1;
             while (true)
@@ -181,7 +182,6 @@ namespace XtraViewScopeFormApplication
                     e.Cancel = true;
                     Program.log.Info("Acquisition cancelled by user, stopping");
                     Program.runConnectionManagerConsumer = false;
-                    Program.runSignalAnalysisResultConsumer = false;
                     return;
                 }
                 //Generate the link on the interface in another thread that waits for the report to be created first.

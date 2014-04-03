@@ -3,11 +3,13 @@ using ScopeLibrary.ReportWriting;
 using ScopeLibrary.SignalAnalysis;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using XtraViewScope.Models;
 using XtraViewScope.ScopeAnalysis;
+using XtraViewScopeFormApplication.Models;
 using XtraViewScopeFormApplication.Models.Enums;
 using XtraViewScopeFormApplication.ScopeAnalysis;
 
@@ -18,11 +20,10 @@ namespace XtraViewScopeFormApplication.ReportWriting
         private XtraViewScopeForm XtraViewScopeForm { get; set; }
         public SignalAnalysisResultConsumer(XtraViewScopeForm xtraViewScopeForm)
         {
-            HeartbeatTiming = new HeartbeatTiming();
-            HeartbeatTiming.LatestHeartbeatDateTime = null;
-            HeartbeatTiming.Shortest = null;
-            HeartbeatTiming.Longest = null;
             XtraViewScopeForm = xtraViewScopeForm;
+
+            XmpTransmissionDelegates.IrInboundAnalysedEvent += new XmpTransmissionDelegates.IrInboundAnalysedEventHandler(consumeIrInbound);
+            XmpTransmissionDelegates.HeartbeatAnalysedEvent += new XmpTransmissionDelegates.HeartbeatAnalysedEventHandler(consumeHeartbeat);
         }
 
         private HeartbeatTiming heartbeatTiming;
@@ -37,6 +38,13 @@ namespace XtraViewScopeFormApplication.ReportWriting
             }
         }
 
+        public void clearHeartBeatTiming()
+        {
+            HeartbeatTiming = new HeartbeatTiming();
+            HeartbeatTiming.LatestHeartbeatDateTime = null;
+            HeartbeatTiming.Shortest = null;
+            HeartbeatTiming.Longest = null;
+        }
 
         private string outputDirectory;
         public string OutputDirectory { 
@@ -62,65 +70,70 @@ namespace XtraViewScopeFormApplication.ReportWriting
             }
         }
 
-        public void consumeSignalAnalysisResults()
+        public void consumeIrInbound(XmpTransmissionEventArgs e)
         {
-            while (Program.runSignalAnalysisResultConsumer)
+            Add2SignalAnalysisResult add2SignalAnalysisResult = e.SignalAnalysisResultContainer.SignalAnalysisResult as Add2SignalAnalysisResult;
+
+            StringBuilder sb = new StringBuilder();
+            IrInbound irInbound = add2SignalAnalysisResult.XmpPacketTransmission as IrInbound;
+
+            foreach (Add2Packet add2Packet in irInbound.Add2Packets)
             {
-                SignalAnalysisResultContainer signalAnalysisResultContainer = Program.signalAnalysisResultBlockingCollection.Take();
-                Add2SignalAnalysisResult add2SignalAnalysisResult = signalAnalysisResultContainer.SignalAnalysisResult as Add2SignalAnalysisResult;
-
-                if (add2SignalAnalysisResult.XmpPacketTransmission.XmpPacketTransmissionType == XmpPacketTransmissionType.Heartbeat)
+                foreach (Nibble nibble in add2Packet.Nibbles)
                 {
-                    Heartbeat heartbeat = add2SignalAnalysisResult.XmpPacketTransmission as Heartbeat;
-
-                    HeartbeatTiming.LatestHeartbeatDateTime = heartbeat.TimeCaptured;
-
-                    System.Diagnostics.Debug.WriteLine(HeartbeatTiming.ToString());
-
-                    XtraViewScopeForm.uiBackgroundWorker.ReportProgress(-1, HeartbeatTiming);
-
-                    //foreach (SignalAnalysisResultContainer nextSignalAnalysisResultContainer in Program.signalAnalysisResultBlockingCollection)
-                    //{
-                    //    Add2SignalAnalysisResult nextAdd2SignalAnalysisResult = nextSignalAnalysisResultContainer.SignalAnalysisResult as Add2SignalAnalysisResult;
-                    //}
-                }
-                else if (add2SignalAnalysisResult.XmpPacketTransmission.XmpPacketTransmissionType == XmpPacketTransmissionType.IrInbound)
-                {
-                    StringBuilder sb = new StringBuilder();
-                    IrInbound irInbound = add2SignalAnalysisResult.XmpPacketTransmission as IrInbound;
-
-                    foreach (Add2Packet add2Packet in irInbound.Add2Packets)
-                    {
-                        foreach (Nibble nibble in add2Packet.Nibbles)
-                        {
-                            sb.Append(String.Format("{0:X}", nibble.DecimalValue));
-                        }
-                    }
-                    if (XtraViewScopeForm.uiBackgroundWorker.IsBusy)
-                    {
-                        XtraViewScopeForm.uiBackgroundWorker.ReportProgress(-2, sb.ToString());
-                    }
-                }
-                
-
-                foreach (IReportWriter reportWriter in Program.reportWriters)
-                {
-                    reportWriter.Report.ReportContents.SignalAnalysisResultContainer = signalAnalysisResultContainer;
-
-                    if (add2SignalAnalysisResult.XmpPacketTransmission.XmpPacketTransmissionType == XmpPacketTransmissionType.Heartbeat)
-                    {
-                        reportWriter.FilePathString = FileNameFormat + "_heartbeat";
-                        reportWriter.OutputDirectory = OutputDirectory + "\\heartbeat";
-                    }
-                    else if (add2SignalAnalysisResult.XmpPacketTransmission.XmpPacketTransmissionType == XmpPacketTransmissionType.IrInbound)
-                    {
-                        reportWriter.FilePathString = FileNameFormat + "_ir";
-                        reportWriter.OutputDirectory = OutputDirectory + "\\ir";
-                    }
-
-                    Task.Factory.StartNew(reportWriter.WriteReport);
+                    sb.Append(String.Format("{0:X}", nibble.DecimalValue));
                 }
             }
+
+            if (XtraViewScopeForm.uiBackgroundWorker.IsBusy)
+            {
+                XtraViewScopeForm.uiBackgroundWorker.ReportProgress(-2, sb.ToString());
+            }
+
+            if (XtraViewScopeForm.shouldSaveKeyPresses.Checked)
+            {
+                WriteHexValuesToFile(sb.Append(Environment.NewLine));
+            }
+        }
+
+        private void WriteHexValuesToFile(StringBuilder sb)
+        {
+            if (!Directory.Exists(OutputDirectory))
+            {
+                Directory.CreateDirectory(OutputDirectory);
+            }
+
+            FileInfo filePath = new FileInfo(Path.Combine(OutputDirectory, @"hexKeyPresses.txt"));
+            if (!filePath.Exists)
+            {
+                filePath.Create().Close();
+            }
+            else
+            {
+                //File.WriteAllText(filePath.ToString(), String.Empty);
+            }
+
+            File.AppendAllText(filePath.ToString(), sb.ToString());
+        }
+
+        public void consumeHeartbeat(XmpTransmissionEventArgs e)
+        {
+            Add2SignalAnalysisResult add2SignalAnalysisResult = e.SignalAnalysisResultContainer.SignalAnalysisResult as Add2SignalAnalysisResult;
+
+            Heartbeat heartbeat = add2SignalAnalysisResult.XmpPacketTransmission as Heartbeat;
+            HeartbeatTiming.LatestHeartbeatDateTime = heartbeat.TimeCaptured;
+
+            foreach (IReportWriter reportWriter in Program.reportWriters)
+            {
+                reportWriter.Report.ReportContents.SignalAnalysisResultContainer = e.SignalAnalysisResultContainer;
+
+                reportWriter.FilePathString = FileNameFormat + "_heartbeat";
+                reportWriter.OutputDirectory = OutputDirectory + "\\heartbeat";
+
+                Task.Factory.StartNew(reportWriter.WriteReport);
+            }
+
+            XtraViewScopeForm.uiBackgroundWorker.ReportProgress(-1, HeartbeatTiming);
         }
     }
 
@@ -165,16 +178,6 @@ namespace XtraViewScopeFormApplication.ReportWriting
                     
                 }
             }
-        }
-
-        public override string ToString()
-        {
-            return "Total " + Total.ToString() + Environment.NewLine +
-                "latestHeartbeatDateTime " + latestHeartbeatDateTime.Value.ToLongTimeString() + Environment.NewLine +
-                "average " + Average + Environment.NewLine +
-                "shortest " + Shortest + Environment.NewLine +
-                "longest " + Longest + Environment.NewLine
-                ;
         }
     }
 }
