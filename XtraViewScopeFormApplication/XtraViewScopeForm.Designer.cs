@@ -54,6 +54,7 @@ namespace XtraViewScopeFormApplication
             this.shouldSaveKeyPresses = new System.Windows.Forms.CheckBox();
             this.clearKeyPresses = new System.Windows.Forms.Button();
             this.graphHeartbeats = new System.Windows.Forms.Button();
+            this.openLogDirectory = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -264,11 +265,22 @@ namespace XtraViewScopeFormApplication
             this.graphHeartbeats.UseVisualStyleBackColor = true;
             this.graphHeartbeats.Click += new System.EventHandler(this.graphHeartbeats_Click);
             // 
+            // openLogDirectory
+            // 
+            this.openLogDirectory.Location = new System.Drawing.Point(587, 279);
+            this.openLogDirectory.Name = "openLogDirectory";
+            this.openLogDirectory.Size = new System.Drawing.Size(75, 35);
+            this.openLogDirectory.TabIndex = 23;
+            this.openLogDirectory.Text = "Open Log Directory";
+            this.openLogDirectory.UseVisualStyleBackColor = true;
+            this.openLogDirectory.Click += new System.EventHandler(this.openLogDirectory_Click);
+            // 
             // XtraViewScopeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(674, 519);
+            this.Controls.Add(this.openLogDirectory);
             this.Controls.Add(this.graphHeartbeats);
             this.Controls.Add(this.clearKeyPresses);
             this.Controls.Add(this.shouldSaveKeyPresses);
@@ -324,6 +336,7 @@ namespace XtraViewScopeFormApplication
         public System.Windows.Forms.CheckBox shouldSaveKeyPresses;
         private System.Windows.Forms.Button clearKeyPresses;
         private System.Windows.Forms.Button graphHeartbeats;
+        private System.Windows.Forms.Button openLogDirectory;
     }
 }
 

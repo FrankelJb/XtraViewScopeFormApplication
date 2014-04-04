@@ -35,7 +35,7 @@ namespace XtraViewScopeFormApplication
         private void initialiseScopeConfigurationComponenents()
         {
             //Try and find a config file in the directory of the application
-            foreach (string filename in Directory.GetFiles(@"."))
+            foreach (string filename in Directory.GetFiles(Directory.GetCurrentDirectory() + "\\Resources"))
             {
                 if (filename.ToLower().Contains("config"))
                 {
@@ -107,7 +107,7 @@ namespace XtraViewScopeFormApplication
             }
 
             //Load the hex values of the key presseses into a dictionary
-            Program.keyPressConfigManager.ConfigFilePath = @"..\..\Resources\irKeyMapping.properties";
+            Program.keyPressConfigManager.ConfigFilePath = Environment.CurrentDirectory + "\\Resources\\irKeyMapping.properties";
             Program.keyPressConfigManager.loadConfigDocument();
 
             //Load the config file and set the default save file format
@@ -218,7 +218,7 @@ namespace XtraViewScopeFormApplication
                 }
                 else
                 {
-                    irKeyPresses.AppendText(keyPress);//TODO: Change this to "unknown"
+                    irKeyPresses.AppendText(keyPress);
                 }
             }
         }
@@ -345,8 +345,22 @@ namespace XtraViewScopeFormApplication
             p.StartInfo.FileName = @"C:\Python27\python.exe";
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.UseShellExecute = false; // make sure we can read the output from stdout
-            p.StartInfo.Arguments = @"C:\Projects\Python\wxPython.py"; // start the python program with two parameters
-            p.Start();
+            p.StartInfo.Arguments = Environment.CurrentDirectory + "\\Resources\\heartbeatGrapher.py";
+            try
+            {
+                p.Start();
+            }
+            catch (Exception ex)
+            {
+                Program.log.Error("Cannot start python heartbeat grapher");
+                Program.log.Error(ex);
+            }
+        }
+
+        private void openLogDirectory_Click(object sender, EventArgs e)
+        {
+            string path = Environment.CurrentDirectory + "\\logs";
+            System.Diagnostics.Process.Start(path);
         }
     }
 }
