@@ -35,11 +35,19 @@ namespace XtraViewScopeFormApplication
         private void initialiseScopeConfigurationComponenents()
         {
             //Try and find a config file in the directory of the application
-            foreach (string filename in Directory.GetFiles(Directory.GetCurrentDirectory() + "\\Resources"))
+            string currentDirectory = Directory.GetCurrentDirectory();
+
+            if (Directory.Exists(Directory.GetCurrentDirectory() + "\\Resources"))
+            {
+                currentDirectory += "\\Resources";
+            }
+
+            foreach (string filename in Directory.GetFiles(currentDirectory))
             {
                 if (filename.ToLower().Contains("config"))
                 {
                     configFilePath.Text = Path.GetFullPath(filename);
+                    break;
                 }
             }
 
