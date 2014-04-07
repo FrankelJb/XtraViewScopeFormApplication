@@ -286,15 +286,15 @@ namespace XtraViewScopeFormApplication.ConnectionManagement
             }
         }
 
-        private ScopeVerticalCoupling coupling = ScopeVerticalCoupling.DC;
+        private ScopeVerticalCoupling coupling = ScopeVerticalCoupling.AC;
         public ScopeVerticalCoupling Coupling
         {
             get
             {
                 string couplingProperty = null;
-                if(ConfigManager.getProperty("Coupling") != null)
+                if (ConfigManager.getProperty("ScopeVerticalCoupling") != null)
                 {
-                    couplingProperty = ConfigManager.getProperty("Coupling");
+                    couplingProperty = ConfigManager.getProperty("ScopeVerticalCoupling");
                 }
                 switch (couplingProperty)
                 {

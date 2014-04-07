@@ -1,7 +1,7 @@
 ﻿<ScopeProperties>
   <!-- These are the scope properties -->
   <ChannelName>0</ChannelName>
-  <Coupling>AC</Coupling>
+  <ScopeVerticalCoupling>AC</ScopeVerticalCoupling>
   <IdQuery>false</IdQuery>
   <NumberOfMeasurentSamplesToFetch>-1</NumberOfMeasurentSamplesToFetch>
   <NumberOfPointsMin>70000</NumberOfPointsMin>

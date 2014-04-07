@@ -115,7 +115,18 @@ namespace XtraViewScopeFormApplication
             }
 
             //Load the hex values of the key presseses into a dictionary
-            Program.keyPressConfigManager.ConfigFilePath = Environment.CurrentDirectory + "\\Resources\\irKeyMapping.properties";
+            string currentDirectory = Directory.GetCurrentDirectory();
+
+            if (Directory.Exists(Directory.GetCurrentDirectory() + "\\Resources"))
+            {
+                currentDirectory += "\\Resources";
+            }
+            else
+            {
+                currentDirectory += "..\\..\\..\\Resources";
+            }
+
+            Program.keyPressConfigManager.ConfigFilePath = currentDirectory + "\\irKeyMapping.properties";
             Program.keyPressConfigManager.loadConfigDocument();
 
             //Load the config file and set the default save file format
