@@ -31,13 +31,8 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
 
             int i = 0;
 
-            StringBuilder sb = new StringBuilder();
             while (i < waveform.SampleCount)
             {
-                //sb.Append(period);
-                //sb.Append("\t");
-                //sb.Append(waveform.Samples[i].Value.ToString());
-                //sb.Append(Environment.NewLine);
                 //Lets make sure that we have the proper amplitude, direction doesn't matter. Rounding to avoid 0.99999... != 1 (Which is false)
                 double currentValue = Math.Round(Math.Abs(waveform.Samples[i].Value), 3);
                 if (currentValue < 0.5)
@@ -176,8 +171,6 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                             currentNibble = new Nibble();
                             currentNibble.PulseStartTime = period;
 
-                            //currentXmpPacket = new XmpPacket(currentXmpPacketIndex, new Collection<Nibble>());
-                            //waveformTiming.XmpPackets.Add(currentXmpPacket);
                             add2Packets[currentAdd2PacketIndex].Nibbles.Add(currentNibble);
                         }
                         else
@@ -193,8 +186,6 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
 
                 i++;
             }
-
-            //WriteData(sb);
 
             if(add2Packets[0].Nibbles[0].DecimalValue == 14)
             {
@@ -231,22 +222,6 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                 signalAnalysisResultContainer.SignalAnalysisResult = add2SignalAnalysisResult;
                 XmpTransmissionDelegates.raiseIrInboundAnalysed(signalAnalysisResultContainer);
             }
-        }
-
-        private void WriteData(StringBuilder sb)
-        {
-            //TODO: remove this method and its associated sb
-            FileInfo filePath = new FileInfo(Path.Combine(@"C:\waveform", @"dataPoints.txt"));
-            if (!filePath.Exists)
-            {
-                filePath.Create().Close();
-            }
-            else
-            {
-                //File.WriteAllText(filePath.ToString(), String.Empty);
-            }
-
-            File.WriteAllText(filePath.ToString(), sb.ToString());
         }
     }
 }
