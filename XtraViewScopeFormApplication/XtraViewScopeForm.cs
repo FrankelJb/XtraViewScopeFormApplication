@@ -174,37 +174,29 @@ namespace XtraViewScopeFormApplication
         //It is invoked using a background worker so that the UI does not appear to freeze and the user can stop the application.
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
-            //SignalAnalyser signalAnalyser = new Add2SignalAnalyser();
-            
-            //TODO: remove this consumer
-            //Start the connection manager consumer
-            //ScopeConnectionManagerConsumer scopeConnectionManagerConsumer = new ScopeConnectionManagerConsumer();
-            //Program.runConnectionManagerConsumer = true;
-            //Task.Factory.StartNew(scopeConnectionManagerConsumer.consumeConnectionManager);
-
             //Set the signal analysis heartbeat to be an empty timing object
             signalAnalysisResultConsumer.clearHeartBeatTiming();
             signalAnalysisResultConsumer.OutputDirectory = OutputDirectory;
             signalAnalysisResultConsumer.FileNameFormat = FileNameFormat;
 
-            List<SignalAnalyser> signalAnalysers = new List<SignalAnalyser>(2);
-            //signalAnalysers.Add(new Add2SignalAnalyser());
+            SignalAnalyser[] signalAnalysers = new SignalAnalyser[2];
+
             SignalAnalyser mnecSignalAnalyser = new MnecSignalAnalyser();
             mnecSignalAnalyser.SignalObtained += mnecSignalAnalyser.determineSignalType;
-            signalAnalysers.Add(mnecSignalAnalyser);
+            signalAnalysers[0] = mnecSignalAnalyser;
 
             SignalAnalyser add2SignalAnalyser = new Add2SignalAnalyser();
             add2SignalAnalyser.SignalObtained += add2SignalAnalyser.determineSignalType;
-            signalAnalysers.Add(add2SignalAnalyser);
+            signalAnalysers[1] = add2SignalAnalyser;
 
             int count = 1;
+            xtraViewScopeConnectionManager = new XtraViewScopeConnectionManager();
+
             while (true)
             {
-                xtraViewScopeConnectionManager = new XtraViewScopeConnectionManager();
 
                 //Acquire the scope signal
                 xtraViewScopeConnectionManager.StartAcquisition();
-                Program.scopeConnectionBlockingCollection.Add(xtraViewScopeConnectionManager);
 
                 Program.log.Info("Scope acquisition completed for the " + ScopeLibrary.Util.NumberToString.AddOrdinal(count) + " time");
 
@@ -220,7 +212,6 @@ namespace XtraViewScopeFormApplication
                 {
                     e.Cancel = true;
                     Program.log.Info("Acquisition cancelled by user, stopping");
-                    Program.runConnectionManagerConsumer = false;
                     return;
                 }
 
@@ -379,7 +370,18 @@ namespace XtraViewScopeFormApplication
             p.StartInfo.FileName = @"C:\Python27\python.exe";
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.UseShellExecute = false; // make sure we can read the output from stdout
-            p.StartInfo.Arguments = Environment.CurrentDirectory + "\\Resources\\heartbeatGrapher.py";
+            string currentDirectory = Directory.GetCurrentDirectory();
+
+            if (Directory.Exists(Directory.GetCurrentDirectory() + "\\Resources"))
+            {
+                currentDirectory += "\\Resources";
+            }
+            else
+            {
+                currentDirectory += "..\\..\\..\\Resources";
+            }
+
+            p.StartInfo.Arguments =  currentDirectory + "\\heartbeatGrapher.py";
             try
             {
                 p.Start();

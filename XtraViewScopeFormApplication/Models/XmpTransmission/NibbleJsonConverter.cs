@@ -46,9 +46,9 @@ namespace XtraViewScopeFormApplication.Models.XmpTransmission
 
                 o.Property("TimeDeviation").Value = JObject.Parse(" { " + ScopeLibrary.Util.TimeDeviation.GradeDeviation(Math.Abs(nibble.TimeDeviation)) + " : " + JToken.FromObject(Math.Round(nibble.TimeDeviation, 3)) + " } ");
 
-                if (nibble.NibbleStatus == null)
+                if (nibble.Status == null)
                 {
-                    o.Property("NibbleStatus").Remove();
+                    o.Property("Status").Remove();
                 }
 
                 o.WriteTo(writer);

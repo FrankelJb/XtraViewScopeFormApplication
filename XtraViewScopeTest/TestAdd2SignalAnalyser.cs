@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NationalInstruments;
+using ScopeLibrary.SignalAnalysis;
 using System.Collections.ObjectModel;
 using XtraViewScopeFormApplication.Models.Dictionaries;
 using XtraViewScopeFormApplication.Models.Enums;
@@ -86,15 +87,15 @@ namespace XtraViewScopeTest
         public void TestAdd2PacketCreationSucessful()
         {
             Add2Packet add2Packet = new Add2Packet();
-            add2Packet.Nibbles = new Collection<Nibble>();
+            add2Packet.InformationUnits = new Collection<AbstractInfromationUnit>();
 
             for (int i = 0; i < 8; i++)
             {
-                add2Packet.Nibbles.Add(createAdd2Nibble(i));
+                add2Packet.InformationUnits.Add(createAdd2Nibble(i));
 
             }
 
-            Assert.AreEqual(add2Packet.Nibbles[0].DecimalValue, 14, "The first nibble's decimal value should be 14");
+            Assert.AreEqual(add2Packet.InformationUnits[0].DecimalValue, 14, "The first nibble's decimal value should be 14");
             Assert.AreEqual(add2Packet.Checksum, 0, "The checksum of the add2packet must be 0");
             Assert.AreEqual(add2Packet.MessageType, (MessageType) 0, "This is the first add2packet and should have a message type of " + (MessageType) 0);
             Assert.AreEqual(add2Packet.SequenceNumber, 0, "This is the first add2packet in the sequence and should have a sequence number of 0");

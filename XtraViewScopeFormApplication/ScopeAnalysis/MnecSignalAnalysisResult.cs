@@ -6,7 +6,7 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
     public class MnecSignalAnalysisResult : ISignalAnalysisResult
     {
         private MnecPacketTransmission mnecPacketTransmission;
-        public MnecPacketTransmission MnecPacketTransmission
+        public AbstractPacketTransmission PacketTransmission
         {
             get
             {
@@ -14,7 +14,7 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
             }
             set
             {
-                mnecPacketTransmission = value;
+                mnecPacketTransmission = value as MnecPacketTransmission;
             }
         }
     }

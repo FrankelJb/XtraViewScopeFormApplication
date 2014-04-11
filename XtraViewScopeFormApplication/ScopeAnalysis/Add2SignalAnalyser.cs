@@ -1,9 +1,9 @@
 ﻿using NationalInstruments;
+using ScopeLibrary;
 using ScopeLibrary.SignalAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Text;
 using XtraViewScopeFormApplication.Models.Dictionaries;
 using XtraViewScopeFormApplication.Models.XmpTransmission;
@@ -22,7 +22,7 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
             SignalAnalysisResultContainer signalAnalysisResultContainer = new SignalAnalysisResultContainer();
             Add2SignalAnalysisResult add2SignalAnalysisResult = new Add2SignalAnalysisResult();
 
-            Collection<Add2Packet> add2Packets = new Collection<Add2Packet>();
+            Collection<AbstractIrPacket> add2Packets = new Collection<AbstractIrPacket>();
             Add2Packet currentAdd2Packet = null;
             int currentAdd2PacketIndex = 0;
 
@@ -47,7 +47,7 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                         i++;
                         continue;
                     }
-                    else if (add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].PulseEndTime.FractionalSeconds == 0.0)
+                    else if (add2Packets[currentAdd2PacketIndex].InformationUnits[currentNibbleIndex].PulseEndTime.FractionalSeconds == 0.0)
                     {
                         bool isNoise = false;
                         int countNoiseThreshold = 0;
@@ -77,8 +77,8 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                         {
                             //We've found the start of the noise and the end of the pulse.
                             //The end time of the pulse will be one x-increment before the start of the noise
-                            add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].PulseEndTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
-                            add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].NoiseStartTime = period;
+                            add2Packets[currentAdd2PacketIndex].InformationUnits[currentNibbleIndex].PulseEndTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
+                            add2Packets[currentAdd2PacketIndex].InformationUnits[currentNibbleIndex].NoiseStartTime = period;
                         }
                     }
                 }
@@ -87,15 +87,15 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                     //We are at the start of a new XMP Packet, so lets make a new one
                     if (currentAdd2Packet == null || add2Packets.Count < currentAdd2PacketIndex + 1)
                     {
-                        currentAdd2Packet = new Add2Packet(new Collection<Nibble>());
+                        currentAdd2Packet = new Add2Packet(new Collection<AbstractInfromationUnit>());
                         add2Packets.Add(currentAdd2Packet);
                     }
 
                     //The XMP Packet isn't finished transmitting, so lets get the next nibble
-                    if (add2Packets[currentAdd2PacketIndex].Nibbles.Count < currentNibbleIndex + 1)
+                    if (add2Packets[currentAdd2PacketIndex].InformationUnits.Count < currentNibbleIndex + 1)
                     {
                         currentNibble = new Nibble();
-                        if (add2Packets[currentAdd2PacketIndex].Nibbles.Count == 0)
+                        if (add2Packets[currentAdd2PacketIndex].InformationUnits.Count == 0)
                         {
                             //If this is the first nibble then we can use this startTime for the first peak value.
                             currentNibble.PulseStartTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
@@ -103,24 +103,24 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                         else
                         {
                             //Otherwise we should use the end of the noise from the previous nibble for the startTime plus the x-increment
-                            currentNibble.PulseStartTime = add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex - 1].NoiseEndTime + PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
+                            currentNibble.PulseStartTime = add2Packets[currentAdd2PacketIndex].InformationUnits[currentNibbleIndex - 1].NoiseEndTime + PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
                             //currentNibble.pulseDuration.totalTime = startTime.FractionalSeconds; //TODO: same for this one
                         }
 
-                        add2Packets[currentAdd2PacketIndex].Nibbles.Add(currentNibble);
+                        add2Packets[currentAdd2PacketIndex].InformationUnits.Add(currentNibble);
                     }
                     //This is the end of the nibble, so calculate the end time and move to the next nibble
-                    else if (add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].NoiseStartTime.FractionalSeconds != 0.0 &&
-                        add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].NoiseEndTime.FractionalSeconds == 0.0)
+                    else if (add2Packets[currentAdd2PacketIndex].InformationUnits[currentNibbleIndex].NoiseStartTime.FractionalSeconds != 0.0 &&
+                        add2Packets[currentAdd2PacketIndex].InformationUnits[currentNibbleIndex].NoiseEndTime.FractionalSeconds == 0.0)
                     {
                         //We've found the start of the next pulse so set the end of the noise to one x-increment before
-                        add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].NoiseEndTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
+                        add2Packets[currentAdd2PacketIndex].InformationUnits[currentNibbleIndex].NoiseEndTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
 
                         //If the currentNibble is the ninth nibble then we've finished with this packet and we should move onto the next one
                         if (currentNibbleIndex == 8)
                         {
                             //This isn't actually a nibble, the last pulse is used to indicate this is the end of the XMP packet
-                            add2Packets[currentAdd2PacketIndex].Nibbles.RemoveAt(currentNibbleIndex);
+                            add2Packets[currentAdd2PacketIndex].InformationUnits.RemoveAt(currentNibbleIndex);
                             currentNibbleIndex = 0;
                             currentAdd2PacketIndex++;
                         }
@@ -128,16 +128,16 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                         {
                             try
                             {
-                                add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].BinaryValue =
-                                    Add2Dictionary.GetBinaryData(ScopeLibrary.Util.TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].TotalDuration));
+                                add2Packets[currentAdd2PacketIndex].InformationUnits[currentNibbleIndex].BinaryValue =
+                                    Add2Dictionary.GetBinaryData(ScopeLibrary.Util.TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(add2Packets[currentAdd2PacketIndex].InformationUnits[currentNibbleIndex].TotalDuration));
                             }
                             catch (KeyNotFoundException)
                             {
                                 string logMessage = "Nibble duration was not in an acceptable range: sequence number " + (currentAdd2PacketIndex) +
                                                     ", nibble number " + (currentNibbleIndex) + ", duration found " +
-                                                    ScopeLibrary.Util.TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].TotalDuration);
+                                                    ScopeLibrary.Util.TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(add2Packets[currentAdd2PacketIndex].InformationUnits[currentNibbleIndex].TotalDuration);
                                 Program.log.Error(logMessage);
-                                add2Packets[currentAdd2PacketIndex].Nibbles[currentNibbleIndex].IsNotValid = true;
+                                add2Packets[currentAdd2PacketIndex].InformationUnits[currentNibbleIndex].IsNotValid = true;
                                 //break;
                             }
 
@@ -178,7 +178,7 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
 
                             //currentXmpPacket = new XmpPacket(currentXmpPacketIndex, new Collection<Nibble>());
                             //waveformTiming.XmpPackets.Add(currentXmpPacket);
-                            add2Packets[currentAdd2PacketIndex].Nibbles.Add(currentNibble);
+                            add2Packets[currentAdd2PacketIndex].InformationUnits.Add(currentNibble);
                         }
                         else
                         {
@@ -196,22 +196,22 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
 
             //WriteData(sb);
 
-            if(add2Packets[0].Nibbles[0].DecimalValue == 14)
+            if (add2Packets[0].InformationUnits[0].DecimalValue == 14)
             {
                 //There is one nibble that remains on the last packet because there is only noise at the end of the heartbeat
-                if (add2Packets.Count == 9 && add2Packets[8].Nibbles.Count == 9)
+                if (add2Packets.Count == 9 && add2Packets[8].InformationUnits.Count == 9)
                 {
-                    add2Packets[8].Nibbles.RemoveAt(8);
+                    add2Packets[8].InformationUnits.RemoveAt(8);
                 }
 
-                add2SignalAnalysisResult.XmpPacketTransmission = new Heartbeat();
-                add2SignalAnalysisResult.XmpPacketTransmission.Add2Packets = add2Packets;
-                add2SignalAnalysisResult.XmpPacketTransmission.TimeCaptured = StartTime + PrecisionTimeSpan.FromSeconds(WaveformInfo[0].AbsoluteInitialX);
+                add2SignalAnalysisResult.PacketTransmission = new Heartbeat();
+                add2SignalAnalysisResult.PacketTransmission.IrPackets = add2Packets;
+                add2SignalAnalysisResult.PacketTransmission.TimeCaptured = StartTime + PrecisionTimeSpan.FromSeconds(WaveformInfo[0].AbsoluteInitialX);
 
                 signalAnalysisResultContainer.SignalAnalysisResult = add2SignalAnalysisResult;
                 TransmissionDelegates.raiseHearbeatAnalysed(signalAnalysisResultContainer);
             }
-            else if(add2Packets[0].Nibbles[0].DecimalValue == 1)
+            else if (add2Packets[0].InformationUnits[0].DecimalValue == 1)
             {
                 //IR button presses are sent multiple times if the user long-presses a button, truncate the message to be 2 packets long
                 for (int j = add2Packets.Count - 1; j > 1 ; j--)
@@ -220,13 +220,13 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                 }
 
                 //Remove the noise at the end
-                if (add2Packets[add2Packets.Count - 1].Nibbles.Count == 9)
+                if (add2Packets[add2Packets.Count - 1].InformationUnits.Count == 9)
                 {
-                    add2Packets[add2Packets.Count - 1].Nibbles.RemoveAt(8);
+                    add2Packets[add2Packets.Count - 1].InformationUnits.RemoveAt(8);
                 }
 
-                add2SignalAnalysisResult.XmpPacketTransmission = new IrInbound();
-                add2SignalAnalysisResult.XmpPacketTransmission.Add2Packets = add2Packets;
+                add2SignalAnalysisResult.PacketTransmission = new IrInbound();
+                add2SignalAnalysisResult.PacketTransmission.IrPackets = add2Packets;
 
                 signalAnalysisResultContainer.SignalAnalysisResult = add2SignalAnalysisResult;
                 TransmissionDelegates.raiseIrInboundAnalysed(signalAnalysisResultContainer);

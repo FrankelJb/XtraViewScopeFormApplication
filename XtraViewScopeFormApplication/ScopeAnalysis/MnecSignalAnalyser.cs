@@ -1,4 +1,5 @@
 ﻿using NationalInstruments;
+using ScopeLibrary;
 using ScopeLibrary.SignalAnalysis;
 using System;
 using System.Collections.Generic;
@@ -20,14 +21,14 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
             AnalogWaveform<double> waveform = Waveforms[0];
 
             SignalAnalysisResultContainer signalAnalysisResultContainer = new SignalAnalysisResultContainer();
-            MnecSignalAnalysisResult mnecSignalAnalysisResult = new MnecSignalAnalysisResult();
+            ISignalAnalysisResult mnecSignalAnalysisResult = new MnecSignalAnalysisResult();
 
-            Collection<MnecPacket> mnecPackets = new Collection<MnecPacket>();
+            Collection<AbstractIrPacket> mnecPackets = new Collection<AbstractIrPacket>();
             MnecPacket currentMnecPacket = null;
             int currentMnecPacketIndex = 0;
 
-            Nibble currentNibble = null;
-            int currentNibbleIndex = 0;
+            Bit currentBit = null;
+            int currentBitIndex = 0;
 
             int i = 0;
 
@@ -47,7 +48,7 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                         i++;
                         continue;
                     }
-                    else if (mnecPackets[currentMnecPacketIndex].Nibbles[currentNibbleIndex].PulseEndTime.FractionalSeconds == 0.0)
+                    else if (mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex].PulseEndTime.FractionalSeconds == 0.0)
                     {
                         bool isNoise = false;
                         int countNoiseThreshold = 0;
@@ -77,8 +78,8 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                         {
                             //We've found the start of the noise and the end of the pulse.
                             //The end time of the pulse will be one x-increment before the start of the noise
-                            mnecPackets[currentMnecPacketIndex].Nibbles[currentNibbleIndex].PulseEndTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
-                            mnecPackets[currentMnecPacketIndex].Nibbles[currentNibbleIndex].NoiseStartTime = period;
+                            mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex].PulseEndTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
+                            mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex].NoiseStartTime = period;
                         }
                     }
                 }
@@ -87,64 +88,64 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                     //We are at the start of a new XMP Packet, so lets make a new one
                     if (currentMnecPacket == null || mnecPackets.Count < currentMnecPacketIndex + 1)
                     {
-                        currentMnecPacket = new MnecPacket(new Collection<Nibble>());
+                        currentMnecPacket = new MnecPacket(new Collection<AbstractInfromationUnit>());
                         mnecPackets.Add(currentMnecPacket);
                     }
 
                     //The XMP Packet isn't finished transmitting, so lets get the next nibble
-                    if (mnecPackets[currentMnecPacketIndex].Nibbles.Count < currentNibbleIndex + 1)
+                    if (mnecPackets[currentMnecPacketIndex].InformationUnits.Count < currentBitIndex + 1)
                     {
-                        currentNibble = new Nibble();
-                        if (mnecPackets[currentMnecPacketIndex].Nibbles.Count == 0)
+                        currentBit = new Bit();
+                        if (mnecPackets[currentMnecPacketIndex].InformationUnits.Count == 0)
                         {
                             //If this is the first nibble then we can use this startTime for the first peak value.
-                            currentNibble.PulseStartTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
+                            currentBit.PulseStartTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
                         }
                         else
                         {
                             //Otherwise we should use the end of the noise from the previous nibble for the startTime plus the x-increment
-                            currentNibble.PulseStartTime = mnecPackets[currentMnecPacketIndex].Nibbles[currentNibbleIndex - 1].NoiseEndTime + PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
+                            currentBit.PulseStartTime = mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex - 1].NoiseEndTime + PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
                             //currentNibble.pulseDuration.totalTime = startTime.FractionalSeconds; //TODO: same for this one
                         }
 
-                        mnecPackets[currentMnecPacketIndex].Nibbles.Add(currentNibble);
+                        mnecPackets[currentMnecPacketIndex].InformationUnits.Add(currentBit);
                     }
                     //This is the end of the nibble, so calculate the end time and move to the next nibble
-                    else if (mnecPackets[currentMnecPacketIndex].Nibbles[currentNibbleIndex].NoiseStartTime.FractionalSeconds != 0.0 &&
-                        mnecPackets[currentMnecPacketIndex].Nibbles[currentNibbleIndex].NoiseEndTime.FractionalSeconds == 0.0)
+                    else if (mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex].NoiseStartTime.FractionalSeconds != 0.0 &&
+                        mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex].NoiseEndTime.FractionalSeconds == 0.0)
                     {
                         //We've found the start of the next pulse so set the end of the noise to one x-increment before
-                        mnecPackets[currentMnecPacketIndex].Nibbles[currentNibbleIndex].NoiseEndTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
+                        mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex].NoiseEndTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
 
                         //If the currentNibble is the ninth nibble then we've finished with this packet and we should move onto the next one
-                        //if (currentNibbleIndex == 30)
-                        //{
-                        //    //This isn't actually a nibble, the last pulse is used to indicate this is the end of the XMP packet
-                        //    mnecPackets[currentMnecPacketIndex].Nibbles.RemoveAt(currentNibbleIndex);
-                        //    currentNibbleIndex = 0;
-                        //    currentMnecPacketIndex++;
-                        //}
-                        //else
-                        //{
+                        if (currentBitIndex == 34)
+                        {
+                            //This isn't actually a nibble, the last pulse is used to indicate this is the end of the XMP packet
+                            mnecPackets[currentMnecPacketIndex].InformationUnits.RemoveAt(currentBitIndex);
+                            currentBitIndex = 0;
+                            currentMnecPacketIndex++;
+                        }
+                        else
+                        {
                             try
                             {
-                                mnecPackets[currentMnecPacketIndex].Nibbles[currentNibbleIndex].BinaryValue =
-                                    MnecDictionary.GetBinaryData(ScopeLibrary.Util.TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(mnecPackets[currentMnecPacketIndex].Nibbles[currentNibbleIndex].TotalDuration));
+                                mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex].BinaryValue =
+                                    MnecDictionary.GetBinaryData(ScopeLibrary.Util.TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex].TotalDuration));
                             }
                             catch (KeyNotFoundException)
                             {
-                                System.Diagnostics.Debug.WriteLine(ScopeLibrary.Util.TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(mnecPackets[currentMnecPacketIndex].Nibbles[currentNibbleIndex].TotalDuration));
+                                //System.Diagnostics.Debug.WriteLine(ScopeLibrary.Util.TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex].TotalDuration));
                                 string logMessage = "Nibble duration was not in an acceptable range: sequence number " + (currentMnecPacketIndex) +
-                                                    ", nibble number " + (currentNibbleIndex) + ", duration found " +
-                                                    ScopeLibrary.Util.TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(mnecPackets[currentMnecPacketIndex].Nibbles[currentNibbleIndex].TotalDuration);
+                                                    ", nibble number " + (currentBitIndex) + ", duration found " +
+                                                    ScopeLibrary.Util.TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex].TotalDuration);
                                 Program.log.Error(logMessage);
-                                mnecPackets[currentMnecPacketIndex].Nibbles[currentNibbleIndex].IsNotValid = true;
+                                mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex].IsNotValid = true;
                                 //break;
                             }
 
                             //Once we've finished using this nibble, we move onto the next one.
-                            currentNibbleIndex++;
-                        //}
+                            currentBitIndex++;
+                        }
 
 
                         bool isNoise = false;
@@ -174,12 +175,12 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                         if (isNoise)
                         {
                             //If the pulse only has one sample then we need to use this data to start the next nibble because we won't be coming back into the currentValue >= 0.5
-                            currentNibble = new Nibble();
-                            currentNibble.PulseStartTime = period;
+                            currentBit = new Bit();
+                            currentBit.PulseStartTime = period;
 
                             //currentXmpPacket = new XmpPacket(currentXmpPacketIndex, new Collection<Nibble>());
                             //waveformTiming.XmpPackets.Add(currentXmpPacket);
-                            mnecPackets[currentMnecPacketIndex].Nibbles.Add(currentNibble);
+                            mnecPackets[currentMnecPacketIndex].InformationUnits.Add(currentBit);
                         }
                         else
                         {
@@ -197,28 +198,34 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
 
             //WriteData(sb);
             int c = 0;
-            foreach (Nibble nibble in mnecPackets[0].Nibbles)
+            StringBuilder hexBuilder = new StringBuilder();
+            for (int j = 1; j < mnecPackets[0].InformationUnits.Count; j++)
             {
-                if (c % 4 == 0)
+                hexBuilder.Append(mnecPackets[0].InformationUnits[j].DecimalValue);
+                if (hexBuilder.Length == 4)
                 {
-                    System.Diagnostics.Debug.Write("    ");
+                    System.Diagnostics.Debug.Write(String.Format("{0:X}", Convert.ToByte(hexBuilder.ToString(), 2)));
+                    hexBuilder.Clear();
                 }
-                System.Diagnostics.Debug.Write(String.Format("{0:X}", nibble.DecimalValue));
-                c++;
-
             }
+            System.Diagnostics.Debug.WriteLine("");
 
-            if (mnecPackets[0].Nibbles[0].DecimalValue == 2)
+            if (mnecPackets[0].InformationUnits[0].DecimalValue == 2)
             {
-                //There is one nibble that remains on the last packet because there is only noise at the end of the heartbeat
-                if (mnecPackets.Count == 9 && mnecPackets[8].Nibbles.Count == 9)
+                //    //IR button presses are sent multiple times if the user long-presses a button, truncate the message to be 2 packets long
+                for (int j = mnecPackets.Count - 1; j > 0; j--)
                 {
-                    mnecPackets[8].Nibbles.RemoveAt(8);
+                    mnecPackets.RemoveAt(j);
+                }
+                //There is one nibble that remains on the last packet because there is only noise at the end of the heartbeat
+                if (mnecPackets.Count == 9 && mnecPackets[8].InformationUnits.Count == 9)
+                {
+                    mnecPackets[8].InformationUnits.RemoveAt(8);
                 }
 
-                mnecSignalAnalysisResult.MnecPacketTransmission = new XtraViewScopeFormApplication.Models.MnecTransmission.IrInbound();
-                mnecSignalAnalysisResult.MnecPacketTransmission.MnecPackets = mnecPackets;
-                mnecSignalAnalysisResult.MnecPacketTransmission.TimeCaptured = StartTime + PrecisionTimeSpan.FromSeconds(WaveformInfo[0].AbsoluteInitialX);
+                mnecSignalAnalysisResult.PacketTransmission = new XtraViewScopeFormApplication.Models.MnecTransmission.IrInbound();
+                mnecSignalAnalysisResult.PacketTransmission.IrPackets = mnecPackets;
+                mnecSignalAnalysisResult.PacketTransmission.TimeCaptured = StartTime + PrecisionTimeSpan.FromSeconds(WaveformInfo[0].AbsoluteInitialX);
 
                 signalAnalysisResultContainer.SignalAnalysisResult = mnecSignalAnalysisResult;
                 TransmissionDelegates.raiseIrInboundAnalysed(signalAnalysisResultContainer);
@@ -249,7 +256,7 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
         {
             PrecisionDateTime period = StartTime + PrecisionTimeSpan.FromSeconds(WaveformInfo[0].AbsoluteInitialX);
             AnalogWaveform<double> waveform = Waveforms[0];
-            Nibble nibble = null;
+            Bit bit = null;
             int i = 0;
 
             while (i < waveform.SampleCount)
@@ -258,12 +265,12 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                 double currentValue = Math.Round(Math.Abs(waveform.Samples[i].Value), 3);
                 if (currentValue < 0.5)
                 {
-                    if (nibble == null)
+                    if (bit == null)
                     {
                         i++;
                         continue;
                     }
-                    else if (nibble.PulseEndTime.FractionalSeconds == 0.0)
+                    else if (bit.PulseEndTime.FractionalSeconds == 0.0)
                     {
                         bool isNoise = false;
                         int countNoiseThreshold = 0;
@@ -293,29 +300,29 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                         {
                             //We've found the start of the noise and the end of the pulse.
                             //The end time of the pulse will be one x-increment before the start of the noise
-                            nibble.PulseEndTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
-                            nibble.NoiseStartTime = period;
+                            bit.PulseEndTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
+                            bit.NoiseStartTime = period;
                         }
                     }
                 }
                 else if (currentValue >= 0.5)
                 {
                     //We are at the start of a new XMP Packet, so lets make a new one
-                    if (nibble == null)
+                    if (bit == null)
                     {
-                        nibble = new Nibble();
-                        nibble.PulseStartTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
+                        bit = new Bit();
+                        bit.PulseStartTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
                     }
 
-                    if (nibble.NoiseStartTime.FractionalSeconds != 0.0 &&
-                        nibble.NoiseEndTime.FractionalSeconds == 0.0)
+                    if (bit.NoiseStartTime.FractionalSeconds != 0.0 &&
+                        bit.NoiseEndTime.FractionalSeconds == 0.0)
                     {
 
-                        nibble.NoiseEndTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
+                        bit.NoiseEndTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
 
                         try
                         {
-                            if (MnecDictionary.GetBinaryData(ScopeLibrary.Util.TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(nibble.TotalDuration)) == Models.Enums.BinaryValue.b0010)
+                            if (MnecDictionary.GetBinaryData(ScopeLibrary.Util.TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(bit.TotalDuration)) == BinaryValue.b0010)
                             {
                                 analyseScopeSignal();
                                 break;

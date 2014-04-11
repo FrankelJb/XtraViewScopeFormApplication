@@ -1,8 +1,8 @@
 ﻿using ScopeLibrary;
+using ScopeLibrary.SignalAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using XtraViewScopeFormApplication.Models.Enums;
 using XtraViewScopeFormApplication.Models.XmpTransmission;
 
 namespace XtraViewScopeFormApplication.Models.MnecTransmission
@@ -10,65 +10,58 @@ namespace XtraViewScopeFormApplication.Models.MnecTransmission
     /// <summary>
     //TODO: summary
     /// </summary>
-    public class MnecPacket : IrPacket
+    public class MnecPacket : AbstractIrPacket
     {
-
-        public MnecPacket(Collection<Nibble> nibbles)
+        public MnecPacket(Collection<AbstractInfromationUnit> informationUnits)
         {
-            Nibbles = nibbles;
+            InformationUnits = informationUnits;
         }
 
-        //TODO: set up the heartbeat requirements
-
-        /// <summary>
-        /// The binary value is obtained by concatenating the binary value of all of the 8 nibbles.
-        /// </summary>
-        public string BinaryValue
+        public override IrType IrType
         {
             get
             {
-                string binaryValue = "";
-                if (Nibbles != null)
+                return IrType.Mnec;
+            }
+        }
+
+        //TODO: Fix this checksum
+        /// <summary>
+        /// Returns the calculation of the checksum. The sum of the nibbles mod 16 should be zero.
+        /// </summary>
+        /// <exception cref="MalformedXmpPacketException">If the checksum doesn't equal zero then there is a problem with this XMP Packet</exception>
+        public override int Checksum
+        {
+            get
+            {
+                int checksum = 0;
+                if (InformationUnits != null && InformationUnits.Count > 1)
                 {
-                    foreach (Nibble nibble in Nibbles)
+                    if (InformationUnits[1].IsNotValid)
                     {
-                        binaryValue += nibble.BinaryValue;
+                        Status.Add("The nibble containing the checksum has either not been captured or the ADD2 Packet is malformed");
+                        return -1;
+                    }
+
+                    foreach (AbstractInfromationUnit abstractInformationUnit in InformationUnits)
+                    {
+                        checksum += abstractInformationUnit.DecimalValue;
+                    }
+                    if (checksum % 16 != 0)
+                    {
+                        Status.Add("The nibble containing the checksum has either not been captured or the ADD2 Packet is malformed");
+                        return checksum;
+                    }
+                    else
+                    {
+                        return 0;
                     }
                 }
                 else
                 {
-                    status.Add("The binary value could not be calculated correctly as there no nibbles.");
+                    Status.Add("The nibble containing the checksum has either not been captured or the ADD2 Packet is malformed");
+                    return -1;
                 }
-                return binaryValue;
-            }
-        }
-
-        private List<string> status = new List<string>();
-        public List<String> Status
-        {
-            get
-            {
-                return status;
-            }
-            set
-            {
-                status = value;
-            }
-        }
-
-        /// <summary>
-        /// Mnec packets are composed of TODO:??? nibbles.
-        /// </summary>
-        private Collection<Nibble> nibbles;
-        public Collection<Nibble> Nibbles
-        {
-            get
-            {
-                return nibbles;
-            }
-            set
-            {
-                nibbles = value;
             }
         }
     }

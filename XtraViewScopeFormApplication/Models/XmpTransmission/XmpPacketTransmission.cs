@@ -1,25 +1,28 @@
 ﻿using NationalInstruments;
+using ScopeLibrary;
+using ScopeLibrary.SignalAnalysis;
 using System.Collections.ObjectModel;
 using XtraViewScopeFormApplication.Models.Enums;
 
 namespace XtraViewScopeFormApplication.Models.XmpTransmission
 {
-    public abstract class XmpPacketTransmission
+    public abstract class XmpPacketTransmission : AbstractPacketTransmission
     {
         private string xmpPacketTransmissionStatus;
         public string XmpPacketTransmissionStatus
         {
             get
             {
-                foreach (Add2Packet add2Packet in Add2Packets)
+                foreach (AbstractIrPacket irPacket in IrPackets)
                 {
-                    if (add2Packet.Status.Count > 0)
+                    if (irPacket.Status.Count > 0)
                     {
                         xmpPacketTransmissionStatus = Enums.XmpPacketTransmissionStatus.FailedAdd2Packets;
                     }
-                    foreach (Nibble nibble in add2Packet.Nibbles)
+                    foreach (AbstractInfromationUnit abstractInfromationUnit in irPacket.InformationUnits)
                     {
-                        if (nibble.NibbleStatus != null)
+                        Nibble nibble = abstractInfromationUnit as Nibble;
+                        if (nibble.Status != null)
                         {
                             xmpPacketTransmissionStatus = Enums.XmpPacketTransmissionStatus.FailedNibbles;
                         }
@@ -38,30 +41,30 @@ namespace XtraViewScopeFormApplication.Models.XmpTransmission
             get;
         }
 
-        private Collection<Add2Packet> add2Packets;
-        public Collection<Add2Packet> Add2Packets
-        {
-            get
-            {
-                return add2Packets;
-            }
-            set
-            {
-                add2Packets = value;
-            }
-        }
+        //private Collection<Add2Packet> add2Packets;
+        //public Collection<Add2Packet> Add2Packets
+        //{
+        //    get
+        //    {
+        //        return add2Packets;
+        //    }
+        //    set
+        //    {
+        //        add2Packets = value;
+        //    }
+        //}
 
-        private PrecisionDateTime timeCaptured;
-        public PrecisionDateTime TimeCaptured
-        {
-            get
-            {
-                return timeCaptured;
-            }
-            set
-            {
-                timeCaptured = value;
-            }
-        }
+        //private PrecisionDateTime timeCaptured;
+        //public PrecisionDateTime TimeCaptured
+        //{
+        //    get
+        //    {
+        //        return timeCaptured;
+        //    }
+        //    set
+        //    {
+        //        timeCaptured = value;
+        //    }
+        //}
     }
 }

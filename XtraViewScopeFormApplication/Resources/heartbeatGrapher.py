@@ -131,9 +131,9 @@ def CreateHeartbeat(text, filename):
     json_data = json.loads(text)
     heartbeat = Heartbeat(filename)
 
-    for add2packet in json_data['XmpPacketTransmission']['Add2Packets']:
+    for add2packet in json_data['XmpPacketTransmission']['IrPackets']:
         newAdd2Packet = Add2Packet()
-        for nibble in add2packet['Nibbles']:
+        for nibble in add2packet['InformationUnits']:
             timing = NibbleTiming(nibble['PulseDuration'],
                                   nibble['NoiseDuration'],
                                   nibble['OptimalDuration'],

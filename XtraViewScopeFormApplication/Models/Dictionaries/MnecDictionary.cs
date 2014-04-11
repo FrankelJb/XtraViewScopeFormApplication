@@ -1,6 +1,6 @@
-﻿using System;
+﻿using ScopeLibrary.SignalAnalysis;
+using System;
 using System.Collections.Generic;
-using XtraViewScopeFormApplication.Models.Enums;
 
 namespace  XtraViewScopeFormApplication.Models.Dictionaries
 {

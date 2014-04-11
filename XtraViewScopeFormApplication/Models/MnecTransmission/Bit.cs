@@ -5,7 +5,7 @@ using XtraViewScopeFormApplication.Models.Dictionaries;
 
 namespace XtraViewScopeFormApplication.Models.XmpTransmission
 {
-    public class Nibble : AbstractInfromationUnit
+    public class Bit : AbstractInfromationUnit
     {
         public override double OptimalDuration
         {
@@ -13,14 +13,14 @@ namespace XtraViewScopeFormApplication.Models.XmpTransmission
             {
                 try
                 {
-                    return Add2Dictionary.GetOptimalDuration(TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(TotalDuration));
+                    return MnecDictionary.GetOptimalDuration(TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(TotalDuration));
                 }
                 catch (KeyNotFoundException)
                 {
-                    Status ="Nibble duration does not fall within available ranges";
+                    Status ="Bit duration does not fall within available ranges";
                     IsNotValid = true;
 
-                    return Add2Dictionary.GetFailedOptimalDuration(TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(TotalDuration));
+                    return MnecDictionary.GetFailedOptimalDuration(TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(TotalDuration));
                 }
             }
         }

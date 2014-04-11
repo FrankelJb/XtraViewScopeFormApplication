@@ -6,7 +6,7 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
     public class Add2SignalAnalysisResult : ISignalAnalysisResult
     {
         private XmpPacketTransmission xmpPacketTransmission;
-        public XmpPacketTransmission XmpPacketTransmission
+        public AbstractPacketTransmission PacketTransmission
         {
             get
             {
@@ -14,7 +14,7 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
             }
             set
             {
-                xmpPacketTransmission = value;
+                xmpPacketTransmission = value as XmpPacketTransmission;
             }
         }
     }

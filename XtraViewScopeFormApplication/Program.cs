@@ -23,10 +23,6 @@ namespace XtraViewScopeFormApplication
         public static IConfigManager keyPressConfigManager;
         public static List<IReportWriter> reportWriters;
 
-        //This blocking collection is used to queue acquired signal to be analysed
-        public static BlockingCollection<IScopeConnectionManager> scopeConnectionBlockingCollection = new BlockingCollection<IScopeConnectionManager>();
-        public static bool runConnectionManagerConsumer = true;
-
         /// <summary>
         /// The main entry point for the application.
         /// </summary>

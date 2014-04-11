@@ -1,4 +1,6 @@
-﻿using ScopeLibrary.ReportWriting;
+﻿using ScopeLibrary;
+using ScopeLibrary.ReportWriting;
+using ScopeLibrary.SignalAnalysis;
 using System;
 using System.IO;
 using System.Text;
@@ -64,16 +66,14 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
 
         public void consumeIrInbound(TransmissionEventArgs e)
         {
-            Add2SignalAnalysisResult add2SignalAnalysisResult = e.SignalAnalysisResultContainer.SignalAnalysisResult as Add2SignalAnalysisResult;
-
             StringBuilder sb = new StringBuilder();
-            IrInbound irInbound = add2SignalAnalysisResult.XmpPacketTransmission as IrInbound;
+            ISignalAnalysisResult signalAnalysisResult = e.SignalAnalysisResultContainer.SignalAnalysisResult;
 
-            foreach (Add2Packet add2Packet in irInbound.Add2Packets)
+            foreach (AbstractIrPacket abstractIrPacket in signalAnalysisResult.PacketTransmission.IrPackets)
             {
-                foreach (Nibble nibble in add2Packet.Nibbles)
+                foreach (AbstractInfromationUnit abstractInfromationUnit in abstractIrPacket.InformationUnits)
                 {
-                    sb.Append(String.Format("{0:X}", nibble.DecimalValue));
+                    sb.Append(String.Format("{0:X}", abstractInfromationUnit.DecimalValue));
                 }
             }
 
@@ -112,10 +112,10 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
 
         public void consumeHeartbeat(TransmissionEventArgs e)
         {
-            Add2SignalAnalysisResult add2SignalAnalysisResult = e.SignalAnalysisResultContainer.SignalAnalysisResult as Add2SignalAnalysisResult;
+            ISignalAnalysisResult signalAnalysisResult = e.SignalAnalysisResultContainer.SignalAnalysisResult;
 
-            Heartbeat heartbeat = add2SignalAnalysisResult.XmpPacketTransmission as Heartbeat;
-            HeartbeatTiming.LatestHeartbeatDateTime = heartbeat.TimeCaptured;
+            //Heartbeat heartbeat = add2SignalAnalysisResult.PacketTransmission as Heartbeat;
+            HeartbeatTiming.LatestHeartbeatDateTime = signalAnalysisResult.PacketTransmission.TimeCaptured;// heartbeat.TimeCaptured;
 
             foreach (IReportWriter reportWriter in Program.reportWriters)
             {
