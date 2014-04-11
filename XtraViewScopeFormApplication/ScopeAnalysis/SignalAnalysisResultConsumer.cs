@@ -14,8 +14,8 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
         {
             XtraViewScopeForm = xtraViewScopeForm;
 
-            XmpTransmissionDelegates.IrInboundAnalysedEvent += new XmpTransmissionDelegates.IrInboundAnalysedEventHandler(consumeIrInbound);
-            XmpTransmissionDelegates.HeartbeatAnalysedEvent += new XmpTransmissionDelegates.HeartbeatAnalysedEventHandler(consumeHeartbeat);
+            TransmissionDelegates.IrInboundAnalysedEvent += new TransmissionDelegates.IrInboundAnalysedEventHandler(consumeIrInbound);
+            TransmissionDelegates.HeartbeatAnalysedEvent += new TransmissionDelegates.HeartbeatAnalysedEventHandler(consumeHeartbeat);
         }
 
         private HeartbeatTiming heartbeatTiming;
@@ -62,7 +62,7 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
             }
         }
 
-        public void consumeIrInbound(XmpTransmissionEventArgs e)
+        public void consumeIrInbound(TransmissionEventArgs e)
         {
             Add2SignalAnalysisResult add2SignalAnalysisResult = e.SignalAnalysisResultContainer.SignalAnalysisResult as Add2SignalAnalysisResult;
 
@@ -110,7 +110,7 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
             File.AppendAllText(filePath.ToString(), sb.ToString());
         }
 
-        public void consumeHeartbeat(XmpTransmissionEventArgs e)
+        public void consumeHeartbeat(TransmissionEventArgs e)
         {
             Add2SignalAnalysisResult add2SignalAnalysisResult = e.SignalAnalysisResultContainer.SignalAnalysisResult as Add2SignalAnalysisResult;
 

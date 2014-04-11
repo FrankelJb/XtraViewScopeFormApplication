@@ -174,17 +174,28 @@ namespace XtraViewScopeFormApplication
         //It is invoked using a background worker so that the UI does not appear to freeze and the user can stop the application.
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
-            SignalAnalyser signalAnalyser = new Add2SignalAnalyser();
+            //SignalAnalyser signalAnalyser = new Add2SignalAnalyser();
             
+            //TODO: remove this consumer
             //Start the connection manager consumer
-            ScopeConnectionManagerConsumer scopeConnectionManagerConsumer = new ScopeConnectionManagerConsumer();
-            Program.runConnectionManagerConsumer = true;
-            Task.Factory.StartNew(scopeConnectionManagerConsumer.consumeConnectionManager);
+            //ScopeConnectionManagerConsumer scopeConnectionManagerConsumer = new ScopeConnectionManagerConsumer();
+            //Program.runConnectionManagerConsumer = true;
+            //Task.Factory.StartNew(scopeConnectionManagerConsumer.consumeConnectionManager);
 
             //Set the signal analysis heartbeat to be an empty timing object
             signalAnalysisResultConsumer.clearHeartBeatTiming();
             signalAnalysisResultConsumer.OutputDirectory = OutputDirectory;
             signalAnalysisResultConsumer.FileNameFormat = FileNameFormat;
+
+            List<SignalAnalyser> signalAnalysers = new List<SignalAnalyser>(2);
+            //signalAnalysers.Add(new Add2SignalAnalyser());
+            SignalAnalyser mnecSignalAnalyser = new MnecSignalAnalyser();
+            mnecSignalAnalyser.SignalObtained += mnecSignalAnalyser.determineSignalType;
+            signalAnalysers.Add(mnecSignalAnalyser);
+
+            SignalAnalyser add2SignalAnalyser = new Add2SignalAnalyser();
+            add2SignalAnalyser.SignalObtained += add2SignalAnalyser.determineSignalType;
+            signalAnalysers.Add(add2SignalAnalyser);
 
             int count = 1;
             while (true)
@@ -197,9 +208,13 @@ namespace XtraViewScopeFormApplication
 
                 Program.log.Info("Scope acquisition completed for the " + ScopeLibrary.Util.NumberToString.AddOrdinal(count) + " time");
 
-                signalAnalyser.StartTime = xtraViewScopeConnectionManager.StartTime;
-                signalAnalyser.Waveforms = xtraViewScopeConnectionManager.Waveforms;
-                signalAnalyser.WaveformInfo = xtraViewScopeConnectionManager.WaveformInfo;
+                foreach (SignalAnalyser signalAnalyser in signalAnalysers)
+                {
+                    signalAnalyser.StartTime = xtraViewScopeConnectionManager.StartTime;
+                    signalAnalyser.Waveforms = xtraViewScopeConnectionManager.Waveforms;
+                    signalAnalyser.WaveformInfo = xtraViewScopeConnectionManager.WaveformInfo;
+                    signalAnalyser.onSignalObtained(EventArgs.Empty);
+                }
 
                 if (uiBackgroundWorker.CancellationPending)
                 {

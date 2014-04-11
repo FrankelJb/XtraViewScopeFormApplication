@@ -8,17 +8,17 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
     {
         public void consumeConnectionManager()
         {
-            while (Program.runConnectionManagerConsumer)
-            {
-                IScopeConnectionManager scopeConnectionManager = Program.scopeConnectionBlockingCollection.Take();
+            //while (Program.runConnectionManagerConsumer)
+            //{
+            //    IScopeConnectionManager scopeConnectionManager = Program.scopeConnectionBlockingCollection.Take();
 
-                SignalAnalyser signalAnalyser = new Add2SignalAnalyser();
-                signalAnalyser.StartTime = scopeConnectionManager.StartTime;
-                signalAnalyser.Waveforms = scopeConnectionManager.Waveforms;
-                signalAnalyser.WaveformInfo = scopeConnectionManager.WaveformInfo;
+            //    SignalAnalyser signalAnalyser = new Add2SignalAnalyser();
+            //    signalAnalyser.StartTime = scopeConnectionManager.StartTime;
+            //    signalAnalyser.Waveforms = scopeConnectionManager.Waveforms;
+            //    signalAnalyser.WaveformInfo = scopeConnectionManager.WaveformInfo;
 
-                Task.Factory.StartNew(signalAnalyser.analyseScopeSignal);
-            }
+            //    //Task.Factory.StartNew(signalAnalyser.analyseScopeSignal);
+            //}
         }
     }
 }

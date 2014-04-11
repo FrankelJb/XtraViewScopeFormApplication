@@ -14,7 +14,7 @@ namespace XtraViewScopeFormApplication.Models.XmpTransmission
     /// The fourth nibble is the sequence number.
     /// The rest of the nibbles contain the payload.
     /// </summary>
-    public class Add2Packet : IXmpPacket
+    public class Add2Packet : IrPacket
     {
         public Add2Packet()
         {
@@ -25,11 +25,11 @@ namespace XtraViewScopeFormApplication.Models.XmpTransmission
             Nibbles = nibbles;
         }
 
-        public XmpType XmpType
+        public IrType IrType
         {
             get
             {
-                return XmpType.Add2;
+                return IrType.Add2;
             }
         }
 

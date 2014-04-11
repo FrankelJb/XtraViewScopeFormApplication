@@ -124,20 +124,21 @@ namespace XtraViewScopeFormApplication.Models.XmpTransmission
             }
         }
 
+        //TODO: Nibbles need to use the appropriate dictionary
         public double OptimalDuration
         {
             get
             {
                 try
                 {
-                    return Add2Dictionary.GetOptimalDuration(TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(TotalDuration));
+                    return MnecDictionary.GetOptimalDuration(TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(TotalDuration));
                 }
                 catch (KeyNotFoundException)
                 {
                     nibbleStatus ="Nibble duration does not fall within available ranges";
                     IsNotValid = true;
 
-                    return Add2Dictionary.GetFailedOptimalDuration(TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(TotalDuration));
+                    return MnecDictionary.GetFailedOptimalDuration(TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(TotalDuration));
                 }
             }
         }

@@ -65,10 +65,7 @@
     </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Ivi.Driver, Version=1.0.0.0, Culture=neutral, PublicKeyToken=a128c98f1d7717c1, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Ivi.Driver.dll</HintPath>
-    </Reference>
+    <Reference Include="Ivi.Driver, Version=1.0.0.0, Culture=neutral, PublicKeyToken=a128c98f1d7717c1, processorArchitecture=MSIL" />
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
@@ -84,8 +81,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\NationalInstruments.ModularInstruments.NIScope.Fx45.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\..\..\..\waveform\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\ScopeLibrary\ScopeLibrary\lib\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -101,11 +99,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectionManagement\XtraViewScopeConnectionManager.cs" />
+    <Compile Include="Models\Dictionaries\MnecDictionary.cs" />
     <Compile Include="Models\Enums\XmpPacketLayerType.cs" />
+    <Compile Include="Models\MnecTransmission\IrInbound.cs" />
+    <Compile Include="Models\MnecTransmission\MnecPacket.cs" />
+    <Compile Include="Models\MnecTransmission\MnecPacketTransmission.cs" />
     <Compile Include="Models\XmpTransmission\HeartbeatTiming.cs" />
     <Compile Include="Models\XmpTransmission\IrInbound.cs" />
     <Compile Include="Models\XmpTransmission\XmpPacketTransmission.cs" />
     <Compile Include="Models\XmpTransmission\XmpTransmissionDelegates.cs" />
+    <Compile Include="ScopeAnalysis\MnecSignalAnalysisResult.cs" />
+    <Compile Include="ScopeAnalysis\MnecSignalAnalyser.cs" />
     <Compile Include="ScopeAnalysis\SignalAnalysisResultConsumer.cs" />
     <Compile Include="ScopeAnalysis\ScopeConnectionManagerConsumer.cs" />
     <Compile Include="XtraViewScopeForm.cs">
@@ -130,7 +134,7 @@
     <Compile Include="ReportWriting\ReportWriter.cs" />
     <Compile Include="ReportWriting\XmlReportContents.cs" />
     <Compile Include="ScopeAnalysis\Add2SignalAnalyser.cs" />
-    <Compile Include="ScopeAnalysis\Add2SignalAnalysisResultContainer.cs" />
+    <Compile Include="ScopeAnalysis\Add2SignalAnalysisResult.cs" />
     <EmbeddedResource Include="XtraViewScopeForm.resx">
       <DependentUpon>XtraViewScopeForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -154,7 +158,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="XtraViewScopeFormApplication_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

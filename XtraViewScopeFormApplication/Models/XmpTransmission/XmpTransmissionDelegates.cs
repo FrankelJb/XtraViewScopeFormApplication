@@ -3,34 +3,34 @@ using System;
 
 namespace XtraViewScopeFormApplication.Models.XmpTransmission
 {
-    public class XmpTransmissionDelegates
+    public class TransmissionDelegates
     {
-        public delegate void HeartbeatAnalysedEventHandler(XmpTransmissionEventArgs e);
+        public delegate void HeartbeatAnalysedEventHandler(TransmissionEventArgs e);
         public static event HeartbeatAnalysedEventHandler HeartbeatAnalysedEvent;
 
         public static void raiseHearbeatAnalysed(SignalAnalysisResultContainer signalAnalysisResultContainer)
         {
-            if (XmpTransmissionDelegates.HeartbeatAnalysedEvent != null)
+            if (TransmissionDelegates.HeartbeatAnalysedEvent != null)
             {
-                HeartbeatAnalysedEvent(new XmpTransmissionEventArgs(signalAnalysisResultContainer));
+                HeartbeatAnalysedEvent(new TransmissionEventArgs(signalAnalysisResultContainer));
             }
         } 
 
-        public delegate void IrInboundAnalysedEventHandler(XmpTransmissionEventArgs e);
+        public delegate void IrInboundAnalysedEventHandler(TransmissionEventArgs e);
         public static event IrInboundAnalysedEventHandler IrInboundAnalysedEvent;
 
         public static void raiseIrInboundAnalysed(SignalAnalysisResultContainer signalAnalysisResultContainer)
         {
-            if (XmpTransmissionDelegates.IrInboundAnalysedEvent != null)
+            if (TransmissionDelegates.IrInboundAnalysedEvent != null)
             {
-                IrInboundAnalysedEvent(new XmpTransmissionEventArgs(signalAnalysisResultContainer));
+                IrInboundAnalysedEvent(new TransmissionEventArgs(signalAnalysisResultContainer));
             }
         }   
     }
 
-    public class XmpTransmissionEventArgs : EventArgs
+    public class TransmissionEventArgs : EventArgs
     {
-        public XmpTransmissionEventArgs(SignalAnalysisResultContainer signalAnalysisResultContainer)
+        public TransmissionEventArgs(SignalAnalysisResultContainer signalAnalysisResultContainer)
         {
             this.signalAnalysisResultContainer = signalAnalysisResultContainer;
         }
