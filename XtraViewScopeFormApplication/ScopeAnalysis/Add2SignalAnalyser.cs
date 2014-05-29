@@ -87,7 +87,7 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                     //We are at the start of a new XMP Packet, so lets make a new one
                     if (currentAdd2Packet == null || add2Packets.Count < currentAdd2PacketIndex + 1)
                     {
-                        currentAdd2Packet = new Add2Packet(new Collection<AbstractInfromationUnit>());
+                        currentAdd2Packet = new Add2Packet(new Collection<AbstractInformationUnit>());
                         add2Packets.Add(currentAdd2Packet);
                     }
 
@@ -209,7 +209,7 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                 add2SignalAnalysisResult.PacketTransmission.TimeCaptured = StartTime + PrecisionTimeSpan.FromSeconds(WaveformInfo[0].AbsoluteInitialX);
 
                 signalAnalysisResultContainer.SignalAnalysisResult = add2SignalAnalysisResult;
-                TransmissionDelegates.raiseHearbeatAnalysed(signalAnalysisResultContainer);
+                TransmissionDelegates.raiseHeartbeatAnalysed(signalAnalysisResultContainer);
             }
             else if (add2Packets[0].InformationUnits[0].DecimalValue == 1)
             {

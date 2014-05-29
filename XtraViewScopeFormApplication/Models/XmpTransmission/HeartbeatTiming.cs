@@ -34,6 +34,11 @@ namespace XtraViewScopeFormApplication.Models.XmpTransmission
                     if (Longest.Value < value - latestHeartbeatDateTime.Value)
                     {
                         Longest = value - latestHeartbeatDateTime.Value;
+
+                        if (Longest > PrecisionTimeSpan.FromSeconds(32))
+                        {
+                            System.Diagnostics.Debug.WriteLine(Longest);
+                        }
                     }
 
                     Total += value - latestHeartbeatDateTime;

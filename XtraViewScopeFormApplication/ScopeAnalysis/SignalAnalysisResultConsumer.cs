@@ -1,10 +1,12 @@
 ﻿using ScopeLibrary;
 using ScopeLibrary.ReportWriting;
 using ScopeLibrary.SignalAnalysis;
+using ScopeLibrary.Util;
 using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using XtraViewScopeFormApplication.Models.MnecTransmission;
 using XtraViewScopeFormApplication.Models.XmpTransmission;
 
 namespace XtraViewScopeFormApplication.ScopeAnalysis
@@ -71,9 +73,18 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
 
             foreach (AbstractIrPacket abstractIrPacket in signalAnalysisResult.PacketTransmission.IrPackets)
             {
-                foreach (AbstractInfromationUnit abstractInfromationUnit in abstractIrPacket.InformationUnits)
+
+                MnecPacket mnecPacket = abstractIrPacket as MnecPacket;
+                if (mnecPacket != null)
                 {
-                    sb.Append(String.Format("{0:X}", abstractInfromationUnit.DecimalValue));
+                    sb.Append(BinaryConverter.BinaryToHexString(BinaryConverter.AbstractInformationUnitCollectionToBitArray(mnecPacket.InformationUnits))); ;
+                }
+                else 
+                {
+                    foreach (AbstractInformationUnit abstractInfromationUnit in abstractIrPacket.InformationUnits)
+                    {
+                        sb.Append(String.Format("{0:X}", abstractInfromationUnit.DecimalValue));
+                    }
                 }
             }
 

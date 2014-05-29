@@ -19,7 +19,7 @@ namespace XtraViewScopeFormApplication.Models.XmpTransmission
                     {
                         xmpPacketTransmissionStatus = Enums.XmpPacketTransmissionStatus.FailedAdd2Packets;
                     }
-                    foreach (AbstractInfromationUnit abstractInfromationUnit in irPacket.InformationUnits)
+                    foreach (AbstractInformationUnit abstractInfromationUnit in irPacket.InformationUnits)
                     {
                         Nibble nibble = abstractInfromationUnit as Nibble;
                         if (nibble.Status != null)

@@ -5,7 +5,7 @@ using XtraViewScopeFormApplication.Models.Dictionaries;
 
 namespace XtraViewScopeFormApplication.Models.XmpTransmission
 {
-    public class Bit : AbstractInfromationUnit
+    public class Bit : AbstractInformationUnit
     {
         public override double OptimalDuration
         {

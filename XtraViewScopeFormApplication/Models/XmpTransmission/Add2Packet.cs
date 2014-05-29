@@ -21,7 +21,7 @@ namespace XtraViewScopeFormApplication.Models.XmpTransmission
         {
         }
 
-        public Add2Packet(Collection<AbstractInfromationUnit> informationUnits)
+        public Add2Packet(Collection<AbstractInformationUnit> informationUnits)
         {
             InformationUnits = informationUnits;
         }
@@ -51,7 +51,7 @@ namespace XtraViewScopeFormApplication.Models.XmpTransmission
                         return -1;
                     }
 
-                    foreach (AbstractInfromationUnit abstractInformationUnit in InformationUnits)
+                    foreach (AbstractInformationUnit abstractInformationUnit in InformationUnits)
                     {
                         checksum += abstractInformationUnit.DecimalValue;
                     }

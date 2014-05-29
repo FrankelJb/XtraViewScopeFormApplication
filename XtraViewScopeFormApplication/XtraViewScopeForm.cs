@@ -224,13 +224,18 @@ namespace XtraViewScopeFormApplication
             if (e.ProgressPercentage == -1)
             {
                 startButton.Text = heartbeatCount++.ToString();
-                HeartbeatTiming hearbeatTiming = (HeartbeatTiming)e.UserState;
-                averageLabel.Text = "Average: " + Math.Round(hearbeatTiming.Average, 3);
-                shortestLabel.Text = "Shortest: " + Math.Round(hearbeatTiming.Shortest.Value.TotalSeconds, 3);
-                longestLabel.Text = "Longest: " + Math.Round(hearbeatTiming.Longest.Value.TotalSeconds, 3);
+                HeartbeatTiming heartbeatTiming = (HeartbeatTiming)e.UserState;
+                averageLabel.Text = "Average: " + Math.Round(heartbeatTiming.Average, 3);
+                shortestLabel.Text = "Shortest: " + Math.Round(heartbeatTiming.Shortest.Value.TotalSeconds, 3);
+                longestLabel.Text = "Longest: " + Math.Round(heartbeatTiming.Longest.Value.TotalSeconds, 3);
             }
             else if (e.ProgressPercentage == -2)
             {
+                if (File.GetLastWriteTime(Program.keyPressConfigManager.ConfigFilePath) > Program.keyPressConfigManager.LastModified)
+                {
+                    Program.keyPressConfigManager.loadConfigDocument();
+                }
+
                 string keyPress = (string)e.UserState;
                 if(irKeyPresses.Text.Length > 0)
                 {

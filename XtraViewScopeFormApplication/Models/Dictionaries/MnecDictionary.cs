@@ -9,11 +9,11 @@ namespace  XtraViewScopeFormApplication.Models.Dictionaries
         /// <summary>
         /// This dictionary is used in definition of the MNEC protocol. The duration of a nibble maps to a binary value described in this dictionary.
         /// </summary>
-        public static Dictionary<NibbleKey, BinaryValue> NibbleDictionary = new Dictionary<NibbleKey, BinaryValue> 
+        public static Dictionary<BitKey, BinaryValue> NibbleDictionary = new Dictionary<BitKey, BinaryValue> 
         {
-            { new NibbleKey(900, 1100),  BinaryValue.b0000 },
-            { new NibbleKey(1900, 2100), BinaryValue.b0001 },
-            { new NibbleKey(11900, 12000), BinaryValue.b0010 }
+            { new BitKey(900, 1100),  BinaryValue.b0000 },
+            { new BitKey(1900, 2100), BinaryValue.b0001 },
+            { new BitKey(11900, 12000), BinaryValue.b0010 }
         };
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace  XtraViewScopeFormApplication.Models.Dictionaries
         /// <exception cref="KeyNotFoundException">Thrown because the duration of the nibble is not between the upper and lower bounds of any of the table's keys</exception>
         public static BinaryValue GetBinaryData(double nibbleDuration)
         {
-            foreach (NibbleKey key in NibbleDictionary.Keys)
+            foreach (BitKey key in NibbleDictionary.Keys)
             {
                 if (key.LowerLimit <= nibbleDuration && key.UpperLimit >= nibbleDuration)
                 {
@@ -45,7 +45,7 @@ namespace  XtraViewScopeFormApplication.Models.Dictionaries
         /// <exception cref="KeyNotFoundException">Thrown because the duration of the nibble is not between the upper and lower bounds of any of the table's keys</exception>
         public static double GetDeviation(double nibbleDuration)
         {
-            foreach (NibbleKey key in NibbleDictionary.Keys)
+            foreach (BitKey key in NibbleDictionary.Keys)
             {
                 if (key.LowerLimit <= nibbleDuration && key.UpperLimit >= nibbleDuration)
                 {
@@ -67,7 +67,7 @@ namespace  XtraViewScopeFormApplication.Models.Dictionaries
         /// <exception cref="KeyNotFoundException">Thrown because the duration of the nibble is not between the upper and lower bounds of any of the table's keys</exception>
         public static double GetOptimalDuration(double nibbleDuration)
         {
-            foreach (NibbleKey key in NibbleDictionary.Keys)
+            foreach (BitKey key in NibbleDictionary.Keys)
             {
                 if (key.LowerLimit <= nibbleDuration && key.UpperLimit >= nibbleDuration)
                 {
@@ -98,7 +98,7 @@ namespace  XtraViewScopeFormApplication.Models.Dictionaries
             //}
             //else
             //{
-                foreach (NibbleKey key in NibbleDictionary.Keys)
+                foreach (BitKey key in NibbleDictionary.Keys)
                 {
                     if (key.UpperLimit < nibbleDuration)
                     {
@@ -115,9 +115,9 @@ namespace  XtraViewScopeFormApplication.Models.Dictionaries
         /// 
         /// The key is defined using the nibble decoding total time lower limit and the nibble decoding total time upper limit.
         /// </summary>
-        public class NibbleKey
+        public class BitKey
         {
-            public NibbleKey(int lowerLimit, int upperLimit)
+            public BitKey(int lowerLimit, int upperLimit)
             {
                 this.lowerLimit = lowerLimit;
                 this.upperLimit = upperLimit;

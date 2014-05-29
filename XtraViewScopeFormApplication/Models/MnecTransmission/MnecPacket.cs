@@ -12,7 +12,7 @@ namespace XtraViewScopeFormApplication.Models.MnecTransmission
     /// </summary>
     public class MnecPacket : AbstractIrPacket
     {
-        public MnecPacket(Collection<AbstractInfromationUnit> informationUnits)
+        public MnecPacket(Collection<AbstractInformationUnit> informationUnits)
         {
             InformationUnits = informationUnits;
         }
@@ -43,7 +43,7 @@ namespace XtraViewScopeFormApplication.Models.MnecTransmission
                         return -1;
                     }
 
-                    foreach (AbstractInfromationUnit abstractInformationUnit in InformationUnits)
+                    foreach (AbstractInformationUnit abstractInformationUnit in InformationUnits)
                     {
                         checksum += abstractInformationUnit.DecimalValue;
                     }

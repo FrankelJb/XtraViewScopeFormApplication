@@ -85,42 +85,41 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                 }
                 else if (currentValue >= 0.5)
                 {
-                    //We are at the start of a new XMP Packet, so lets make a new one
+                    //We are at the start of a new MNEC Packet, so lets make a new one
                     if (currentMnecPacket == null || mnecPackets.Count < currentMnecPacketIndex + 1)
                     {
-                        currentMnecPacket = new MnecPacket(new Collection<AbstractInfromationUnit>());
+                        currentMnecPacket = new MnecPacket(new Collection<AbstractInformationUnit>());
                         mnecPackets.Add(currentMnecPacket);
                     }
 
-                    //The XMP Packet isn't finished transmitting, so lets get the next nibble
+                    //The MNEC Packet isn't finished transmitting, so lets get the next bit
                     if (mnecPackets[currentMnecPacketIndex].InformationUnits.Count < currentBitIndex + 1)
                     {
                         currentBit = new Bit();
                         if (mnecPackets[currentMnecPacketIndex].InformationUnits.Count == 0)
                         {
-                            //If this is the first nibble then we can use this startTime for the first peak value.
+                            //If this is the first bit then we can use this startTime for the first peak value.
                             currentBit.PulseStartTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
                         }
                         else
                         {
-                            //Otherwise we should use the end of the noise from the previous nibble for the startTime plus the x-increment
+                            //Otherwise we should use the end of the noise from the previous bit for the startTime plus the x-increment
                             currentBit.PulseStartTime = mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex - 1].NoiseEndTime + PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
-                            //currentNibble.pulseDuration.totalTime = startTime.FractionalSeconds; //TODO: same for this one
                         }
 
                         mnecPackets[currentMnecPacketIndex].InformationUnits.Add(currentBit);
                     }
-                    //This is the end of the nibble, so calculate the end time and move to the next nibble
+                    //This is the end of the bit, so calculate the end time and move to the next bit
                     else if (mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex].NoiseStartTime.FractionalSeconds != 0.0 &&
                         mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex].NoiseEndTime.FractionalSeconds == 0.0)
                     {
                         //We've found the start of the next pulse so set the end of the noise to one x-increment before
                         mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex].NoiseEndTime = period - PrecisionTimeSpan.FromSeconds(WaveformInfo[0].XIncrement);
 
-                        //If the currentNibble is the ninth nibble then we've finished with this packet and we should move onto the next one
-                        if (currentBitIndex == 34)
+                        //If the currentBit is the 33rd bit then we've finished with this packet and we should move onto the next one
+                        if (currentBitIndex == 33)
                         {
-                            //This isn't actually a nibble, the last pulse is used to indicate this is the end of the XMP packet
+                            //This isn't actually a bit, the last pulse is used to indicate this is the end of the MNEC packet
                             mnecPackets[currentMnecPacketIndex].InformationUnits.RemoveAt(currentBitIndex);
                             currentBitIndex = 0;
                             currentMnecPacketIndex++;
@@ -135,15 +134,15 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                             catch (KeyNotFoundException)
                             {
                                 //System.Diagnostics.Debug.WriteLine(ScopeLibrary.Util.TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex].TotalDuration));
-                                string logMessage = "Nibble duration was not in an acceptable range: sequence number " + (currentMnecPacketIndex) +
-                                                    ", nibble number " + (currentBitIndex) + ", duration found " +
+                                string logMessage = "Bit duration was not in an acceptable range: sequence number " + (currentMnecPacketIndex) +
+                                                    ", bit number " + (currentBitIndex) + ", duration found " +
                                                     ScopeLibrary.Util.TimeConversion.PrecisionTimeSpanFractionalSecondComponentToNanos(mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex].TotalDuration);
                                 Program.log.Error(logMessage);
                                 mnecPackets[currentMnecPacketIndex].InformationUnits[currentBitIndex].IsNotValid = true;
                                 //break;
                             }
 
-                            //Once we've finished using this nibble, we move onto the next one.
+                            //Once we've finished using this bit, we move onto the next one.
                             currentBitIndex++;
                         }
 
@@ -174,12 +173,10 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                         }
                         if (isNoise)
                         {
-                            //If the pulse only has one sample then we need to use this data to start the next nibble because we won't be coming back into the currentValue >= 0.5
+                            //If the pulse only has one sample then we need to use this data to start the next bit because we won't be coming back into the currentValue >= 0.5
                             currentBit = new Bit();
                             currentBit.PulseStartTime = period;
 
-                            //currentXmpPacket = new XmpPacket(currentXmpPacketIndex, new Collection<Nibble>());
-                            //waveformTiming.XmpPackets.Add(currentXmpPacket);
                             mnecPackets[currentMnecPacketIndex].InformationUnits.Add(currentBit);
                         }
                         else
@@ -196,31 +193,15 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                 i++;
             }
 
-            //WriteData(sb);
-            int c = 0;
-            StringBuilder hexBuilder = new StringBuilder();
-            for (int j = 1; j < mnecPackets[0].InformationUnits.Count; j++)
-            {
-                hexBuilder.Append(mnecPackets[0].InformationUnits[j].DecimalValue);
-                if (hexBuilder.Length == 4)
-                {
-                    System.Diagnostics.Debug.Write(String.Format("{0:X}", Convert.ToByte(hexBuilder.ToString(), 2)));
-                    hexBuilder.Clear();
-                }
-            }
-            System.Diagnostics.Debug.WriteLine("");
-
             if (mnecPackets[0].InformationUnits[0].DecimalValue == 2)
             {
-                //    //IR button presses are sent multiple times if the user long-presses a button, truncate the message to be 2 packets long
+                //Drop the leader code
+                mnecPackets[0].InformationUnits.RemoveAt(0);
+
+                //IR button presses are sent multiple times if the user long-presses a button, truncate the message to be 2 packets long
                 for (int j = mnecPackets.Count - 1; j > 0; j--)
                 {
                     mnecPackets.RemoveAt(j);
-                }
-                //There is one nibble that remains on the last packet because there is only noise at the end of the heartbeat
-                if (mnecPackets.Count == 9 && mnecPackets[8].InformationUnits.Count == 9)
-                {
-                    mnecPackets[8].InformationUnits.RemoveAt(8);
                 }
 
                 mnecSignalAnalysisResult.PacketTransmission = new XtraViewScopeFormApplication.Models.MnecTransmission.IrInbound();
@@ -307,7 +288,7 @@ namespace XtraViewScopeFormApplication.ScopeAnalysis
                 }
                 else if (currentValue >= 0.5)
                 {
-                    //We are at the start of a new XMP Packet, so lets make a new one
+                    //We are at the start of a new MNEC Packet, so lets make a new one
                     if (bit == null)
                     {
                         bit = new Bit();

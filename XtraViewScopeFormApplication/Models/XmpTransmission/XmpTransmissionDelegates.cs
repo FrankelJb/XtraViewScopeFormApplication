@@ -8,7 +8,7 @@ namespace XtraViewScopeFormApplication.Models.XmpTransmission
         public delegate void HeartbeatAnalysedEventHandler(TransmissionEventArgs e);
         public static event HeartbeatAnalysedEventHandler HeartbeatAnalysedEvent;
 
-        public static void raiseHearbeatAnalysed(SignalAnalysisResultContainer signalAnalysisResultContainer)
+        public static void raiseHeartbeatAnalysed(SignalAnalysisResultContainer signalAnalysisResultContainer)
         {
             if (TransmissionDelegates.HeartbeatAnalysedEvent != null)
             {

@@ -80,7 +80,7 @@ namespace XtraViewScopeFormApplication.ReportWriting
             }
 
             File.WriteAllText(filePath.ToString(), Report.ReportContents.ToString());
-            Program.log.Info("Wrote hearbeat data to " + filePath.ToString());
+            Program.log.Info("Wrote heartbeat data to " + filePath.ToString());
         }
     }
 }

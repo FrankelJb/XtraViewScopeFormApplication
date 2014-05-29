@@ -87,7 +87,7 @@ namespace XtraViewScopeTest
         public void TestAdd2PacketCreationSucessful()
         {
             Add2Packet add2Packet = new Add2Packet();
-            add2Packet.InformationUnits = new Collection<AbstractInfromationUnit>();
+            add2Packet.InformationUnits = new Collection<AbstractInformationUnit>();
 
             for (int i = 0; i < 8; i++)
             {
